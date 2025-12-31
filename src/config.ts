@@ -87,6 +87,7 @@ const defaultAllowedPaths = [
   `${HOME}/Documents`,
   `${HOME}/Downloads`,
   `${HOME}/Desktop`,
+  `${HOME}/.claude`, // Claude Code data (plans, settings)
 ];
 
 const allowedPathsStr = process.env.ALLOWED_PATHS || "";

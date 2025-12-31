@@ -106,6 +106,16 @@ OPENAI_API_KEY=sk-...                      # For voice transcription
 
 **Finding your Telegram user ID:** Message [@userinfobot](https://t.me/userinfobot) on Telegram.
 
+**File access paths:** By default, Claude can access:
+- `CLAUDE_WORKING_DIR` (or home directory if not set)
+- `~/Documents`, `~/Downloads`, `~/Desktop`
+- `~/.claude` (for Claude Code plans and settings)
+
+To customize, set `ALLOWED_PATHS` in `.env` (comma-separated). Note: this **overrides** all defaults, so include `~/.claude` if you want plan mode to work:
+```bash
+ALLOWED_PATHS=/your/project,/other/path,~/.claude
+```
+
 ### 3. Configure MCP Servers (Optional)
 
 Copy and edit the MCP config:
