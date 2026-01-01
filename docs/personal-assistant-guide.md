@@ -232,9 +232,11 @@ Light workout during vacation, ~45-50 min.
 
 Since my Notes folder syncs via iCloud, I open [Ulysses](https://ulysses.app/) on my iPhone at the gym and the workout is right there.
 
-**But here's the really magical part:** I can message Claude mid-workout asking to tweak something - "swap the shoulder press for lateral raises" - and the file updates. I see the change live in Ulysses within seconds.
+I can message Claude mid-workout asking to tweak something, like "swap the shoulder press for lateral raises", and the file updates. I see the change live in Ulysses within seconds.
 
 It's like having a personal trainer in my pocket who knows my training history, my recovery status, and can adjust on the fly.
+
+As usual, the better the context, the better the results. So if you have a training plan or training history, you want those notes to be available to Claude.
 
 ## Example: Life Pulse Command
 
