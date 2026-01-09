@@ -49,18 +49,21 @@ export async function handleText(ctx: Context): Promise<void> {
     return;
   }
 
-  // 4. Mark processing started
+  // 4. Store message for retry
+  session.lastMessage = message;
+
+  // 5. Mark processing started
   const stopProcessing = session.startProcessing();
 
-  // 5. Start typing indicator
+  // 6. Start typing indicator
   const typing = startTypingIndicator(ctx);
 
-  // 6. Create streaming state and callback
+  // 7. Create streaming state and callback
   const state = new StreamingState();
   const statusCallback = createStatusCallback(ctx, state);
 
   try {
-    // 7. Send to Claude with streaming
+    // 8. Send to Claude with streaming
     const response = await session.sendMessageStreaming(
       message,
       username,
@@ -70,7 +73,7 @@ export async function handleText(ctx: Context): Promise<void> {
       ctx
     );
 
-    // 8. Audit log
+    // 9. Audit log
     await auditLog(userId, username, "TEXT", message, response);
   } catch (error) {
     console.error("Error processing message:", error);

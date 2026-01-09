@@ -9,6 +9,7 @@ export {
   handleStatus,
   handleResume,
   handleRestart,
+  handleRetry,
 } from "./commands";
 export { handleText } from "./text";
 export { handleVoice } from "./voice";

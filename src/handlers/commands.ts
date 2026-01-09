@@ -6,7 +6,7 @@
 
 import type { Context } from "grammy";
 import { session } from "../session";
-import { WORKING_DIR, ALLOWED_USERS } from "../config";
+import { WORKING_DIR, ALLOWED_USERS, RESTART_FILE } from "../config";
 import { isAuthorized } from "../security";
 
 /**
@@ -33,6 +33,7 @@ export async function handleStart(ctx: Context): Promise<void> {
       `/stop - Stop current query\n` +
       `/status - Show detailed status\n` +
       `/resume - Resume last session\n` +
+      `/retry - Retry last message\n` +
       `/restart - Restart the bot\n\n` +
       `<b>Tips:</b>\n` +
       `• Prefix with <code>!</code> to interrupt current query\n` +
@@ -193,17 +194,76 @@ export async function handleResume(ctx: Context): Promise<void> {
  */
 export async function handleRestart(ctx: Context): Promise<void> {
   const userId = ctx.from?.id;
+  const chatId = ctx.chat?.id;
 
   if (!isAuthorized(userId, ALLOWED_USERS)) {
     await ctx.reply("Unauthorized.");
     return;
   }
 
-  await ctx.reply("🔄 Restarting bot...");
+  const msg = await ctx.reply("🔄 Restarting bot...");
+
+  // Save message info so we can update it after restart
+  if (chatId && msg.message_id) {
+    try {
+      await Bun.write(
+        RESTART_FILE,
+        JSON.stringify({
+          chat_id: chatId,
+          message_id: msg.message_id,
+          timestamp: Date.now(),
+        })
+      );
+    } catch (e) {
+      console.warn("Failed to save restart info:", e);
+    }
+  }
 
   // Give time for the message to send
   await Bun.sleep(500);
 
   // Exit - launchd will restart us
   process.exit(0);
+}
+
+/**
+ * /retry - Retry the last message (resume session and re-send).
+ */
+export async function handleRetry(ctx: Context): Promise<void> {
+  const userId = ctx.from?.id;
+
+  if (!isAuthorized(userId, ALLOWED_USERS)) {
+    await ctx.reply("Unauthorized.");
+    return;
+  }
+
+  // Check if there's a message to retry
+  if (!session.lastMessage) {
+    await ctx.reply("❌ No message to retry.");
+    return;
+  }
+
+  // Check if something is already running
+  if (session.isRunning) {
+    await ctx.reply("⏳ A query is already running. Use /stop first.");
+    return;
+  }
+
+  const message = session.lastMessage;
+  await ctx.reply(`🔄 Retrying: "${message.slice(0, 50)}${message.length > 50 ? "..." : ""}"`);
+
+  // Simulate sending the message again by emitting a fake text message event
+  // We do this by directly calling the text handler logic
+  const { handleText } = await import("./text");
+
+  // Create a modified context with the last message
+  const fakeCtx = {
+    ...ctx,
+    message: {
+      ...ctx.message,
+      text: message,
+    },
+  } as Context;
+
+  await handleText(fakeCtx);
 }

@@ -75,6 +75,7 @@ class ClaudeSession {
   lastError: string | null = null;
   lastErrorTime: Date | null = null;
   lastUsage: TokenUsage | null = null;
+  lastMessage: string | null = null;
 
   private abortController: AbortController | null = null;
   private isQueryRunning = false;

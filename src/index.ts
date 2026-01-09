@@ -6,7 +6,8 @@
 
 import { Bot } from "grammy";
 import { run, sequentialize } from "@grammyjs/runner";
-import { TELEGRAM_TOKEN, WORKING_DIR, ALLOWED_USERS } from "./config";
+import { TELEGRAM_TOKEN, WORKING_DIR, ALLOWED_USERS, RESTART_FILE } from "./config";
+import { unlinkSync, readFileSync, existsSync } from "fs";
 import {
   handleStart,
   handleNew,
@@ -14,6 +15,7 @@ import {
   handleStatus,
   handleResume,
   handleRestart,
+  handleRetry,
   handleText,
   handleVoice,
   handlePhoto,
@@ -53,6 +55,7 @@ bot.command("stop", handleStop);
 bot.command("status", handleStatus);
 bot.command("resume", handleResume);
 bot.command("restart", handleRestart);
+bot.command("retry", handleRetry);
 
 // ============== Message Handlers ==============
 
@@ -90,6 +93,27 @@ console.log("Starting bot...");
 // Get bot info first
 const botInfo = await bot.api.getMe();
 console.log(`Bot started: @${botInfo.username}`);
+
+// Check for pending restart message to update
+if (existsSync(RESTART_FILE)) {
+  try {
+    const data = JSON.parse(readFileSync(RESTART_FILE, "utf-8"));
+    const age = Date.now() - data.timestamp;
+
+    // Only update if restart was recent (within 30 seconds)
+    if (age < 30000 && data.chat_id && data.message_id) {
+      await bot.api.editMessageText(
+        data.chat_id,
+        data.message_id,
+        "✅ Bot restarted"
+      );
+    }
+    unlinkSync(RESTART_FILE);
+  } catch (e) {
+    console.warn("Failed to update restart message:", e);
+    try { unlinkSync(RESTART_FILE); } catch {}
+  }
+}
 
 // Start with concurrent runner (commands work immediately)
 const runner = run(bot);
