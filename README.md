@@ -5,7 +5,7 @@
 
 **Turn [Claude Code](https://claude.com/product/claude-code) into your personal assistant, accessible from anywhere via Telegram.**
 
-Send text, voice, photos, and documents. See responses and tools usage in real-time.
+Send text, voice, photos, documents, audio, and video. See responses and tools usage in real-time.
 
 ![Demo](assets/demo.gif)
 
@@ -25,6 +25,8 @@ To achieve this, I set up a folder with a CLAUDE.md that teaches Claude about me
 - 🎤 **Voice**: Speak naturally - transcribed via OpenAI and processed by Claude
 - 📸 **Photos**: Send screenshots, documents, or anything visual for analysis
 - 📄 **Documents**: PDFs, text files, and archives (ZIP, TAR) are extracted and analyzed
+- 🎵 **Audio**: Audio files (mp3, m4a, ogg, wav, etc.) are transcribed via OpenAI and processed
+- 🎬 **Video**: Video messages and video notes are processed by Claude
 - 🔄 **Session persistence**: Conversations continue across messages
 - 📨 **Message queuing**: Send multiple messages while Claude works - they queue up automatically. Prefix with `!` or use `/stop` to interrupt and send immediately
 - 🧠 **Extended thinking**: Trigger Claude's reasoning by using words like "think" or "reason" - you'll see its thought process as it works (configurable via `THINKING_TRIGGER_KEYWORDS`)
