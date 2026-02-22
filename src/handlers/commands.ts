@@ -16,6 +16,7 @@ import { searchVault, formatResults } from "../vault-search";
 import { StreamingState, createStatusCallback } from "./streaming";
 import {
   extractGsdCommands,
+  extractNumberedOptions,
   buildActionKeyboard,
 } from "../formatting";
 
@@ -618,9 +619,11 @@ export async function sendGsdCommand(
     // Show context bar + contextual keyboard
     const { commands: gsdCmds, hasClearSuggestion } =
       extractGsdCommands(response);
+    const numberedOpts = extractNumberedOptions(response);
     const keyboard = buildActionKeyboard({
       gsdCommands: gsdCmds,
       hasClearSuggestion,
+      numberedOptions: numberedOpts,
     });
 
     const pct = session.contextPercent;

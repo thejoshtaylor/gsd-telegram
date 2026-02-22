@@ -15,6 +15,7 @@ import {
   ALLOWED_PATHS,
   CLAUDE_CLI_PATH,
   SESSION_FILE,
+  STATE_FILE,
   STREAMING_THROTTLE_MS,
   WORKING_DIR,
 } from "./config";
@@ -96,6 +97,10 @@ class ClaudeSession {
   private _wasInterruptedByNewMessage = false;
   private messageQueue: Array<{ ctx: Context }> = [];
 
+  constructor() {
+    this.restoreState();
+  }
+
   get currentWorkingDir(): string {
     return this._workingDir;
   }
@@ -105,7 +110,40 @@ class ClaudeSession {
       throw new Error(`Directory does not exist: ${path}`);
     }
     this._workingDir = path;
+    this.saveState();
     console.log(`Working directory changed to: ${path}`);
+  }
+
+  /**
+   * Persist current working directory to disk so it survives bot restarts.
+   */
+  private saveState(): void {
+    try {
+      writeFileSync(
+        STATE_FILE,
+        JSON.stringify({ working_dir: this._workingDir, saved_at: new Date().toISOString() })
+      );
+    } catch (err) {
+      console.warn("Failed to save state:", err);
+    }
+  }
+
+  /**
+   * Restore working directory from disk on startup.
+   */
+  private restoreState(): void {
+    try {
+      if (existsSync(STATE_FILE)) {
+        const text = readFileSync(STATE_FILE, "utf-8");
+        const state = JSON.parse(text) as { working_dir?: string };
+        if (state.working_dir && existsSync(state.working_dir)) {
+          this._workingDir = state.working_dir;
+          console.log(`Restored working directory: ${state.working_dir}`);
+        }
+      }
+    } catch {
+      // Ignore — use default from env
+    }
   }
 
   get isActive(): boolean {

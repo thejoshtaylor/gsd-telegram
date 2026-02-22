@@ -174,21 +174,77 @@ export function extractGsdCommands(text: string): {
   return { commands, hasClearSuggestion };
 }
 
+// ============== Numbered Option Extraction ==============
+
+export interface NumberedOption {
+  number: number;
+  text: string;      // Full option text
+  shortLabel: string; // Truncated for button display
+}
+
+/**
+ * Extract numbered options from Claude's response.
+ * Detects patterns like:
+ *   1. Option text
+ *   2. Option text — description
+ *   3. **Bold option** — description
+ * Requires at least 2 consecutive numbered items.
+ */
+export function extractNumberedOptions(text: string): NumberedOption[] {
+  const lines = text.split("\n");
+  const options: NumberedOption[] = [];
+  let lastNum = 0;
+
+  for (const line of lines) {
+    const match = line.match(/^(\d+)\.\s+(.+)/);
+    if (match) {
+      const num = parseInt(match[1]!, 10);
+      const optText = match[2]!.trim();
+      if (num === lastNum + 1) {
+        // Strip markdown bold markers for label
+        const cleanText = optText.replace(/\*\*/g, "").replace(/\s*[-—]\s+.*$/, "");
+        options.push({
+          number: num,
+          text: optText,
+          shortLabel: cleanText.length > 28 ? cleanText.slice(0, 25) + "..." : cleanText,
+        });
+        lastNum = num;
+      } else if (num === 1) {
+        // New sequence — restart
+        options.length = 0;
+        const cleanText = optText.replace(/\*\*/g, "").replace(/\s*[-—]\s+.*$/, "");
+        options.push({
+          number: 1,
+          text: optText,
+          shortLabel: cleanText.length > 28 ? cleanText.slice(0, 25) + "..." : cleanText,
+        });
+        lastNum = 1;
+      }
+    } else if (options.length >= 2 && line.trim() !== "") {
+      // Non-option, non-empty line after we found options — stop
+      break;
+    }
+  }
+
+  return options.length >= 2 ? options : [];
+}
+
 // ============== Action Keyboard Builder ==============
 
 export interface ActionKeyboardOptions {
   gsdCommands?: GsdCommandSuggestion[];
   hasClearSuggestion?: boolean;
+  numberedOptions?: NumberedOption[];
 }
 
 /**
- * Build contextual inline keyboard with GSD suggestion buttons
- * and standard action buttons.
+ * Build contextual inline keyboard with GSD suggestion buttons,
+ * numbered option buttons, and standard action buttons.
  */
 export function buildActionKeyboard(options: ActionKeyboardOptions = {}) {
   const rows: { text: string; callback_data: string }[][] = [];
 
-  const { gsdCommands = [], hasClearSuggestion = false } = options;
+  const { gsdCommands = [], hasClearSuggestion = false, numberedOptions = [] } = options;
 
   if (gsdCommands.length > 0) {
     // Contextual GSD buttons: max 2 per row, max 4 total
@@ -215,6 +271,26 @@ export function buildActionKeyboard(options: ActionKeyboardOptions = {}) {
           callback_data: `gsd-fresh:${gsdCommands[0].command}`,
         },
       ]);
+    }
+  }
+
+  // Numbered option buttons (when Claude presents choices)
+  if (numberedOptions.length > 0) {
+    for (let i = 0; i < numberedOptions.length; i += 2) {
+      const row: { text: string; callback_data: string }[] = [];
+      const opt1 = numberedOptions[i]!;
+      row.push({
+        text: `${opt1.number}. ${opt1.shortLabel}`,
+        callback_data: `option:${opt1.number}`,
+      });
+      if (i + 1 < numberedOptions.length) {
+        const opt2 = numberedOptions[i + 1]!;
+        row.push({
+          text: `${opt2.number}. ${opt2.shortLabel}`,
+          callback_data: `option:${opt2.number}`,
+        });
+      }
+      rows.push(row);
     }
   }
 

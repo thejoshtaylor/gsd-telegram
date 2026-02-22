@@ -17,6 +17,7 @@ import { autoDocument, formatDocReply } from "../autodoc";
 import {
   escapeHtml,
   extractGsdCommands,
+  extractNumberedOptions,
   buildActionKeyboard,
 } from "../formatting";
 import { getLastActionBar, setLastActionBar } from "./commands";
@@ -141,12 +142,14 @@ export async function handleText(ctx: Context): Promise<void> {
             })()
           : null;
 
-        // Extract GSD suggestions from response
+        // Extract GSD suggestions and numbered options from response
         const { commands: gsdCmds, hasClearSuggestion } =
           extractGsdCommands(response);
+        const numberedOpts = extractNumberedOptions(response);
         const keyboard = buildActionKeyboard({
           gsdCommands: gsdCmds,
           hasClearSuggestion,
+          numberedOptions: numberedOpts,
         });
 
         // Delete old action bar

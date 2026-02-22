@@ -79,13 +79,19 @@ export async function handleCallback(ctx: Context): Promise<void> {
     return;
   }
 
-  // 2f. Handle GSD callbacks: gsd:{operation}
+  // 2f. Handle numbered option callbacks: option:{number}
+  if (callbackData.startsWith("option:")) {
+    await handleOptionCallback(ctx, callbackData, chatId);
+    return;
+  }
+
+  // 2g. Handle GSD callbacks: gsd:{operation}
   if (callbackData.startsWith("gsd:")) {
     await handleGsdCallback(ctx, callbackData, chatId);
     return;
   }
 
-  // 2g. Handle GSD phase picker: gsd-{op}:{phase}
+  // 2h. Handle GSD phase picker: gsd-{op}:{phase}
   const gsdPhasePrefixes = ["gsd-exec:", "gsd-plan:", "gsd-discuss:", "gsd-research:", "gsd-verify:", "gsd-remove:"];
   if (gsdPhasePrefixes.some((p) => callbackData.startsWith(p))) {
     await handleGsdPhaseCallback(ctx, callbackData, chatId);
@@ -396,6 +402,29 @@ async function handleProjectCallback(
   }
 
   await ctx.answerCallbackQuery({ text: `Switched to ${project.name}` });
+}
+
+/**
+ * Handle numbered option callback (option:{number}).
+ * Sends the option number to Claude as text input.
+ */
+async function handleOptionCallback(
+  ctx: Context,
+  callbackData: string,
+  chatId: number
+): Promise<void> {
+  const username = ctx.from?.username || "unknown";
+  const userId = ctx.from?.id!;
+  const optNum = callbackData.replace("option:", "");
+
+  // Delete the action bar (buttons become stale after selection)
+  try {
+    await ctx.deleteMessage();
+  } catch {}
+  await ctx.answerCallbackQuery({ text: `Selected option ${optNum}` });
+
+  // Send the number to Claude as text (same as user typing "1")
+  await sendGsdCommand(ctx, optNum, `Option ${optNum}`, username, userId, chatId);
 }
 
 /**

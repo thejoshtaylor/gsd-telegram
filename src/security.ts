@@ -18,7 +18,7 @@ import {
 
 // ============== Rate Limiter ==============
 
-class RateLimiter {
+export class RateLimiter {
   private buckets = new Map<number, RateLimitBucket>();
   private maxTokens: number;
   private refillRate: number; // tokens per second

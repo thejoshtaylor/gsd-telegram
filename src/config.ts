@@ -214,6 +214,7 @@ export const RATE_LIMIT_WINDOW = parseInt(
 
 const TMP = tmpdir();
 export const SESSION_FILE = resolve(TMP, "claude-telegram-session.json");
+export const STATE_FILE = resolve(TMP, "claude-telegram-state.json");
 export const RESTART_FILE = resolve(TMP, "claude-telegram-restart.json");
 export const TEMP_DIR = resolve(TMP, "telegram-bot");
 
