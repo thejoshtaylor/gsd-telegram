@@ -51,11 +51,14 @@ Type any GSD command directly in chat — `/gsd:progress`, `/gsd:execute-phase 8
 Every response includes an action bar:
 
 ```
-[ GSD ] [ Pause ] [ Resume ]
-[ Stop ] [ Retry ] [ New    ]
+[ ▶ Execute Phase 3 ] [ ▶ Plan Phase 3  ]   ← contextual GSD suggestions
+[ 1. Discuss context ] [ 2. Plan directly ]   ← numbered option buttons
+[ 3. Review work     ] [ 4. Something else]
+[ 📋 GSD ] [ ⏸ Pause ] [ ▶ Resume ]          ← standard controls
+[ 🛑 Stop ] [ 🔄 Retry ] [ 🆕 New  ]
 ```
 
-Plus contextual GSD suggestion buttons above when relevant.
+GSD commands found in Claude's response become tappable suggestion buttons. Numbered options (1. 2. 3...) are auto-detected and shown as buttons — no need to type numbers on your phone.
 
 ## Features
 
@@ -71,12 +74,13 @@ Plus contextual GSD suggestion buttons above when relevant.
 - **Session persistence** — conversations continue across messages
 - **Pause/Resume Work** — safely hand off work across sessions using GSD's context handoff
 - **Resume picker** — `/resume` shows recent sessions as tappable buttons
-- **Project switching** — `/project` switches Claude's working directory between projects
+- **Project switching** — `/project` switches Claude's working directory between projects, persists across bot restarts
 - **Auto-retry** — if Claude Code crashes, the bot retries automatically
 - **Context tracking** — see context window usage percentage after each response
 
 ### Interactive UX
 - **Contextual buttons** — GSD commands Claude suggests become tappable buttons
+- **Numbered option buttons** — when Claude presents numbered choices (1. 2. 3...), they appear as tappable buttons in the action bar
 - **Action bar** — GSD, Pause, Resume, Stop, Retry, New after every response
 - **GSD workflow** — `/gsd` shows a button grid for all project management operations
 - **ask_user MCP** — Claude can present options as tappable inline buttons
@@ -217,6 +221,9 @@ npx tsx --watch src/index.ts
 
 # Type check
 npx tsc --noEmit
+
+# Run tests
+npx vitest run
 ```
 
 ## Security
@@ -252,6 +259,10 @@ Multiple layers protect against misuse:
 **Claude can't access files**
 - Check `CLAUDE_WORKING_DIR` points to an existing directory
 - Verify `ALLOWED_PATHS` includes directories you want Claude to access
+
+**Project context lost after restart**
+- The bot persists the working directory to `/tmp/claude-telegram-state.json`
+- If the temp directory is cleared (system reboot), you'll need to `/project` switch once
 
 **Context limit reached**
 - The bot auto-detects context limit errors and clears the session
