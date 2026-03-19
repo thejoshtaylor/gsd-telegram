@@ -26,7 +26,17 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
   3. Bot survives a restart and automatically restores the previous session — user can resume without re-sending their message
   4. Bot rejects messages from users not in the channel, enforces rate limits per channel, and blocks forbidden path patterns before passing them to Claude
   5. Go binary compiles for Windows, resolves claude and pdftotext paths explicitly at startup (logged), and shuts down cleanly draining active sessions
-**Plans**: TBD
+**Plans:** 8 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Go module init, config package, audit logger
+- [ ] 01-02-PLAN.md — Claude subprocess layer (NDJSON events, process spawn, streaming, kill)
+- [ ] 01-03-PLAN.md — Security subsystem (rate limiter, path validation, auth)
+- [ ] 01-04-PLAN.md — Session management (store, worker queue, atomic JSON persistence)
+- [ ] 01-05-PLAN.md — Formatting (MarkdownV2 conversion, tool emoji display)
+- [ ] 01-06-PLAN.md — Bot skeleton, middleware, streaming state, text handler
+- [ ] 01-07-PLAN.md — Command handlers (/start /new /stop /status /resume) and callbacks
+- [ ] 01-08-PLAN.md — Main entry point, build verification, end-to-end smoke test
 
 ### Phase 2: Multi-Project and GSD Integration
 **Goal**: Multiple Telegram channels each route to independent Claude sessions with no context bleed, and the GSD workflow is fully accessible via inline keyboard menus
@@ -54,10 +64,10 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Bot Infrastructure | 0/TBD | Not started | - |
+| 1. Core Bot Infrastructure | 0/8 | Planned | - |
 | 2. Multi-Project and GSD Integration | 0/TBD | Not started | - |
 | 3. Media Handlers and Windows Service | 0/TBD | Not started | - |
