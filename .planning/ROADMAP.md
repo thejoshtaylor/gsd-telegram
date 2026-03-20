@@ -60,9 +60,9 @@ Plans:
   3. Node sends a registration frame after every reconnect, including re-register after recovery from drop
   4. Node sends an explicit disconnect frame on clean shutdown and does not reconnect afterward
   5. A stress test sending concurrent frames from multiple goroutines completes without panic — the single writer goroutine serializes all writes
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 11-01-PLAN.md — ConnectionManager core: dial, backoff, single writer, dependencies
+- [x] 11-01-PLAN.md — ConnectionManager core: dial, backoff, single writer, dependencies
 - [ ] 11-02-PLAN.md — Heartbeat, registration, reconnect recovery, clean shutdown
 
 ### Phase 12: Telegram Removal and Session Migration
@@ -108,7 +108,7 @@ Plans:
 | 8. Polling Stability | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 9. Channel Auth | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 10. Protocol Definitions and Config | v1.2 | 2/2 | Complete    | 2026-03-20 |
-| 11. WebSocket Connection Manager | v1.2 | 0/2 | Not started | - |
+| 11. WebSocket Connection Manager | v1.2 | 1/2 | In Progress|  |
 | 12. Telegram Removal and Session Migration | v1.2 | 0/? | Not started | - |
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 0/? | Not started | - |
 | 14. Protocol and Server Spec Documents | v1.2 | 0/? | Not started | - |

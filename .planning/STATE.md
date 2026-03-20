@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
 status: unknown
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-03-20T23:12:30.445Z"
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-20T23:48:54.483Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Run and orchestrate multiple Claude Code instances across projects from a central server, with each node managing its own local Claude sessions independently.
-**Current focus:** Phase 10 — protocol-definitions-and-config
+**Current focus:** Phase 11 — websocket-connection-manager
 
 ## Current Position
 
-Phase: 10 (protocol-definitions-and-config) — EXECUTING
+Phase: 11 (websocket-connection-manager) — EXECUTING
 Plan: 2 of 2
 
 ## Accumulated Context
@@ -42,6 +42,8 @@ Plan: 2 of 2
 - [Phase 10]: protocol package uses stdlib only (encoding/json) — no external dependencies
 - [Phase 10-02]: machineid.ProtectedID used as primary node ID source, hostname sha256 fallback for containers/CI
 - [Phase 10-02]: NodeConfig separate from Config — no Telegram env vars required for WebSocket config
+- [Phase 11]: Two-phase stopCh check in Send() prevents race when sendCh has buffer capacity after Stop()
+- [Phase 11]: recvCh uses non-blocking send with drop+warn to avoid stalling reader goroutine on inbound frames
 
 ### Pending Todos
 
@@ -62,6 +64,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T23:12:30.438Z
-Stopped at: Completed 10-02-PLAN.md
+Last session: 2026-03-20T23:48:54.472Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
