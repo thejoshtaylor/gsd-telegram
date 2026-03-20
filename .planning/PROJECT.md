@@ -27,6 +27,7 @@ Control Claude Code remotely from Telegram across multiple projects simultaneous
 
 ### Validated
 
+- [x] Typing indicators, audit logging, and command safety checks apply uniformly across all message paths (text, callback, voice, photo, document) — Validated in Phase 6: Cross-Phase Safety Hardening
 - [x] Callback handler integration: workers drain on shutdown, resume/new use correct project dir, streaming respects rate limiter — Validated in Phase 4: Callback Handler Integration Fixes
 - [x] Token usage tracking (input/output/cache) displayed in /status — Validated in Phase 5: Fix Session Metrics and GSD Persistence
 - [x] Context window usage percentage displayed in /status — Validated in Phase 5: Fix Session Metrics and GSD Persistence
@@ -87,4 +88,4 @@ GSD integration currently has basic button support. The Go version needs full co
 | Windows Service over Task Scheduler | Runs at boot without login, proper service management | — Pending |
 
 ---
-*Last updated: 2026-03-20 — Phase 5 complete (session metrics + GSD persistence)*
+*Last updated: 2026-03-20 — Phase 6 complete (cross-phase safety hardening)*
