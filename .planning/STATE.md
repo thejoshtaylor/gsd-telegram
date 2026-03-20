@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-03-20T04:05:33.663Z"
+stopped_at: Phase 04 complete — callback handler integration fixes applied, all 3 audit findings closed
+last_updated: "2026-03-20T04:58:25.862Z"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 17
-  completed_plans: 17
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 18
+  completed_plans: 18
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Control Claude Code remotely from Telegram across multiple projects simultaneously, each in its own channel with its own Claude session.
-**Current focus:** Phase 03 — media-handlers-and-windows-service
+**Current focus:** Phase 04 — callback-handler-integration-fixes
 
 ## Current Position
 
-Phase: 03 (media-handlers-and-windows-service) — EXECUTING
-Plan: 4 of 4
+Phase: 04 (callback-handler-integration-fixes) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Plan: 4 of 4
 | Phase 03 P03 | 8 | 1 tasks | 3 files |
 | Phase 03 P02 | 6 | 2 tasks | 4 files |
 | Phase 03 P04 | 2 | 3 tasks | 2 files |
+| Phase 04 P01 | 15 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,9 @@ Phase 2, Plan 1 (MappingStore + GSD pure functions):
 - [Phase 03-02]: Album photos cleaned up after MediaGroupBuffer fires and session processes the combined prompt
 - [Phase 03-02]: sendPhotoToSession and sendAlbumToSession are separate functions (not shared with HandleText) to avoid refactoring risk
 - [Phase 03]: Media handlers registered after text handler in dispatcher (voice, photo, document)
+- [Phase 04]: callbackWg package-level var deleted; bot WaitGroup injected via HandleCallback signature for graceful shutdown drain
+- [Phase 04]: HandleGsd in command.go also needed globalLimiter param (called enqueueGsdCommand) — auto-fixed as Rule 3 blocking issue
+- [Phase 04]: cfg.WorkingDir retained as fallback in handleCallbackResume/New matching command.go canonical pattern
 
 ### Pending Todos
 
@@ -149,6 +153,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T04:05:33.657Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-03-20T04:58:25.854Z
+Stopped at: Phase 04 complete — callback handler integration fixes applied, all 3 audit findings closed
 Resume file: None

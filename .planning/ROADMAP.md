@@ -13,7 +13,7 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
 - [x] **Phase 1: Core Bot Infrastructure** - Single-channel bot that sends text to Claude and streams the response back, with all safety and persistence infrastructure correct (completed 2026-03-20)
 - [x] **Phase 2: Multi-Project and GSD Integration** - Multiple independent Claude sessions across channels with full GSD workflow keyboard (completed 2026-03-20)
 - [ ] **Phase 3: Media Handlers and Windows Service** - Voice, photo, PDF processing and Windows Service deployment
-- [ ] **Phase 4: Callback Handler Integration Fixes** - Fix WaitGroup tracking, wrong working directory, and missing rate limiter in callback handlers
+- [x] **Phase 4: Callback Handler Integration Fixes** - Fix WaitGroup tracking, wrong working directory, and missing rate limiter in callback handlers (completed 2026-03-20)
 
 ## Phase Details
 
@@ -97,4 +97,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 1. Core Bot Infrastructure | 8/8 | Complete   | 2026-03-20 |
 | 2. Multi-Project and GSD Integration | 4/4 | Complete   | 2026-03-20 |
 | 3. Media Handlers and Windows Service | 1/4 | In Progress | - |
-| 4. Callback Handler Integration Fixes | 0/1 | Pending | - |
+| 4. Callback Handler Integration Fixes | 1/1 | Complete   | 2026-03-20 |
