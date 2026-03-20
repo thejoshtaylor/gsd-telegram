@@ -44,6 +44,8 @@ Control Claude Code remotely from Telegram across multiple projects simultaneous
 
 ### Active
 
+- [x] Long-polling getUpdates without context deadline exceeded errors — v1.1 Phase 8
+
 (See REQUIREMENTS.md for v1.1 requirements)
 
 ## Current Milestone: v1.1 Bugfixes
@@ -97,4 +99,4 @@ External deps: claude CLI, pdftotext (poppler), OpenAI Whisper API, NSSM (Window
 | Token bucket rate limiting | Per-channel, goroutine-safe, configurable | ✓ Good — golang.org/x/time/rate |
 
 ---
-*Last updated: 2026-03-20 after v1.1 milestone start*
+*Last updated: 2026-03-20 after Phase 8 completion*
