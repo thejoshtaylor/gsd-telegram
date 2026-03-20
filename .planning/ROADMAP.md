@@ -55,12 +55,15 @@ Plans:
 **Depends on**: Phase 10
 **Requirements**: XPORT-01, XPORT-02, XPORT-03, XPORT-04, XPORT-05, XPORT-06
 **Success Criteria** (what must be TRUE):
-  1. Node connects to a local mock server over `wss://` and the connection survives a simulated network drop, reconnecting with exponential backoff (500ms–30s with jitter) within observable delay
+  1. Node connects to a local mock server over `wss://` and the connection survives a simulated network drop, reconnecting with exponential backoff (500ms-30s with jitter) within observable delay
   2. Heartbeat ping fires every 30 seconds; the connection manager detects a dead server (no pong) within 90 seconds and initiates reconnect without goroutine leak (`go test -race ./...` clean)
   3. Node sends a registration frame after every reconnect, including re-register after recovery from drop
   4. Node sends an explicit disconnect frame on clean shutdown and does not reconnect afterward
   5. A stress test sending concurrent frames from multiple goroutines completes without panic — the single writer goroutine serializes all writes
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — ConnectionManager core: dial, backoff, single writer, dependencies
+- [ ] 11-02-PLAN.md — Heartbeat, registration, reconnect recovery, clean shutdown
 
 ### Phase 12: Telegram Removal and Session Migration
 **Goal**: Zero Telegram imports in the codebase and session persistence keyed by project name rather than channel ID, so the dispatch layer can be built against clean identity types
@@ -104,8 +107,8 @@ Plans:
 | 1-7. v1.0 Phases | v1.0 | 24/24 | Complete | 2026-03-20 |
 | 8. Polling Stability | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 9. Channel Auth | v1.1 | 1/1 | Complete | 2026-03-20 |
-| 10. Protocol Definitions and Config | v1.2 | 2/2 | Complete   | 2026-03-20 |
-| 11. WebSocket Connection Manager | v1.2 | 0/? | Not started | - |
+| 10. Protocol Definitions and Config | v1.2 | 2/2 | Complete    | 2026-03-20 |
+| 11. WebSocket Connection Manager | v1.2 | 0/2 | Not started | - |
 | 12. Telegram Removal and Session Migration | v1.2 | 0/? | Not started | - |
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 0/? | Not started | - |
 | 14. Protocol and Server Spec Documents | v1.2 | 0/? | Not started | - |
