@@ -13,6 +13,7 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
 - [x] **Phase 1: Core Bot Infrastructure** - Single-channel bot that sends text to Claude and streams the response back, with all safety and persistence infrastructure correct (completed 2026-03-20)
 - [x] **Phase 2: Multi-Project and GSD Integration** - Multiple independent Claude sessions across channels with full GSD workflow keyboard (completed 2026-03-20)
 - [ ] **Phase 3: Media Handlers and Windows Service** - Voice, photo, PDF processing and Windows Service deployment
+- [ ] **Phase 4: Callback Handler Integration Fixes** - Fix WaitGroup tracking, wrong working directory, and missing rate limiter in callback handlers
 
 ## Phase Details
 
@@ -73,6 +74,19 @@ Plans:
 - [ ] 03-03-PLAN.md — Document handler (PDF extraction via pdftotext + text file reading)
 - [ ] 03-04-PLAN.md — Bot dispatcher wiring + NSSM Windows Service documentation + human verification
 
+### Phase 4: Callback Handler Integration Fixes
+**Goal**: Fix three integration findings in the callback handler chain so that callback-spawned workers drain on shutdown, callback resume/new use the correct project directory, and callback-triggered streaming respects the global API rate limiter
+**Depends on**: Phase 3
+**Requirements**: DEPLOY-04, SESS-06, PROJ-01, PROJ-03, PERS-03, CORE-06
+**Gap Closure:** Closes FINDING-01, FINDING-02, FINDING-03 from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. Callback-spawned workers are tracked by the bot's main WaitGroup and drained during graceful shutdown
+  2. handleCallbackResume and handleCallbackNew resolve the channel's project mapping path, not cfg.WorkingDir
+  3. enqueueGsdCommand passes the global API rate limiter to StreamingState, not nil
+
+Plans:
+- [ ] 04-01-PLAN.md — Thread bot WaitGroup, mapping lookup, and globalAPILimiter through callback handler chain
+
 ## Progress
 
 **Execution Order:**
@@ -83,3 +97,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 1. Core Bot Infrastructure | 8/8 | Complete   | 2026-03-20 |
 | 2. Multi-Project and GSD Integration | 4/4 | Complete   | 2026-03-20 |
 | 3. Media Handlers and Windows Service | 1/4 | In Progress | - |
+| 4. Callback Handler Integration Fixes | 0/1 | Pending | - |
