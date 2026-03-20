@@ -1,12 +1,24 @@
-# GSD Telegram Bot (Go Rewrite)
+# GSD Node
 
 ## What This Is
 
-A Telegram bot that lets you control Claude Code from your phone via text, voice, photos, and documents. Built in Go with ~11,600 LOC across 52 files. Supports multiple simultaneous projects, each linked to its own Telegram channel with independent Claude sessions. Includes full GSD workflow integration with interactive button menus. Deploys as a Windows Service.
+A local Go service that manages Claude Code CLI sessions across multiple projects and instances. Connects outbound to a central server via WebSocket, enabling remote orchestration without firewall changes. Each project maps to a working directory; multiple Claude CLI instances can run simultaneously within the same project. Includes full GSD workflow integration. Deploys as a Windows Service.
 
 ## Core Value
 
-Control Claude Code remotely from Telegram across multiple projects simultaneously, each in its own channel with its own Claude session.
+Run and orchestrate multiple Claude Code instances across projects from a central server, with each node managing its own local Claude sessions independently.
+
+## Current Milestone: v1.2 Custom Webapp
+
+**Goal:** Replace Telegram bot interface with a custom WebSocket-based communication protocol, transforming the bot into standalone node software that connects to a central server.
+
+**Target features:**
+- Remove Telegram and TypeScript dependencies entirely
+- Implement outbound WebSocket connection to central server
+- Support multiple simultaneous Claude CLI instances per project
+- Node health/heartbeat and online status reporting
+- Efficient command dispatch from server to node
+- Deliver protocol spec and server backend spec as documentation
 
 ## Current State
 
@@ -60,20 +72,22 @@ Control Claude Code remotely from Telegram across multiple projects simultaneous
 
 ## Context
 
-The Go rewrite is complete — a ground-up redesign from the original ~3,300 line TypeScript/Bun application. The Go version is idiomatically Go with goroutines for concurrency, gotgbot/v2 for Telegram, and zerolog for structured logging. v1.1 added channel authorization via admin lookup and fixed polling timeouts.
+The Go rewrite is complete — a ground-up redesign from the original ~3,300 line TypeScript/Bun application. The Go version is idiomatically Go with goroutines for concurrency and zerolog for structured logging. v1.2 pivots from Telegram bot to standalone node software that connects to a central server. The Telegram and TypeScript layers are being removed entirely.
 
-Tech stack: Go 1.23+, gotgbot/v2, zerolog, godotenv, golang.org/x/time
-External deps: claude CLI, pdftotext (poppler), OpenAI Whisper API, NSSM (Windows Service)
+Architecture: Node connects outbound to server (no firewall changes). Server manages multiple nodes, each node manages multiple projects (directories), each project can have multiple Claude CLI instances. Communication via WebSocket with a custom binary/JSON protocol.
+
+Tech stack: Go 1.23+, zerolog, godotenv, golang.org/x/time, gorilla/websocket (or nhooyr.io/websocket)
+External deps: claude CLI, pdftotext (poppler), NSSM (Windows Service)
 
 ## Constraints
 
 - **Language**: Go — idiomatic Go patterns, goroutines for concurrency
-- **Telegram API**: gotgbot/v2 (PaulSonOfLars/gotgbot)
+- **Communication**: Outbound WebSocket to server — no inbound ports, no firewall changes
 - **Claude CLI**: Wraps `claude` CLI subprocess with NDJSON streaming
-- **Voice transcription**: OpenAI Whisper API
 - **PDF extraction**: `pdftotext` CLI dependency
 - **Platform**: Windows 11, deployed as Windows Service via NSSM
 - **Storage**: JSON files for all persistence (no database)
+- **Multi-instance**: Multiple Claude CLI subprocesses per project directory
 
 ## Key Decisions
 
@@ -91,6 +105,27 @@ External deps: claude CLI, pdftotext (poppler), OpenAI Whisper API, NSSM (Window
 | Token bucket rate limiting | Per-channel, goroutine-safe, configurable | ✓ Good — golang.org/x/time/rate |
 | Admin lookup for channel auth | Zero config — channels auto-authorize if an allowed user is admin | ✓ Good — no channel IDs in .env needed |
 | 15-min admin cache TTL | Balance freshness vs API load for GetChatAdministrators | ✓ Good — sync.Map with inline expiry |
+| Outbound WebSocket over inbound API | Nodes behind NAT/firewalls — no user config needed | — Pending |
+| Remove Telegram entirely | Node software doesn't need chat platform coupling | — Pending |
+| Multiple instances per project | Parallel GSD execution in same directory | — Pending |
+| Spec-first server design | Build node first, deliver specs for server repo | — Pending |
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
 
 ---
-*Last updated: 2026-03-20 after v1.1 milestone*
+*Last updated: 2026-03-20 after v1.2 milestone start*

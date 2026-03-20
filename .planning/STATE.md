@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Bugfixes
-status: complete
-stopped_at: Milestone v1.1 complete
-last_updated: "2026-03-20T21:30:00.000Z"
+milestone: v1.2
+milestone_name: Custom Webapp
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-03-20T22:00:00.000Z"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,13 +18,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-20)
 
-**Core value:** Control Claude Code remotely from Telegram across multiple projects simultaneously, each in its own channel with its own Claude session.
-**Current focus:** Milestone v1.1 complete — planning next milestone
+**Core value:** Run and orchestrate multiple Claude Code instances across projects from a central server, with each node managing its own local Claude sessions independently.
+**Current focus:** Milestone v1.2 — defining requirements
 
 ## Current Position
 
-Milestone: v1.1 Bugfixes — COMPLETE
-Next: /gsd:new-milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-20 — Milestone v1.2 started
 
 ## Accumulated Context
 
@@ -37,6 +39,10 @@ Next: /gsd:new-milestone
 - [Phase 09]: AuthChecker interface unchanged; ChannelAuthFn is a separate fallback parameter
 - [Phase 09]: 15-minute TTL for ChannelAuthCache
 - [Phase 09]: Admin lookup auth moots the concern about operators adding channel IDs to .env
+- [v1.2]: Outbound WebSocket — nodes connect to server, not the other way around
+- [v1.2]: Multiple Claude CLI instances per project (directory)
+- [v1.2]: Remove Telegram and TypeScript entirely
+- [v1.2]: Deliver protocol spec + server backend spec as documentation deliverables
 
 ### Pending Todos
 
@@ -44,7 +50,7 @@ None.
 
 ### Blockers/Concerns
 
-None — Phase 9 blocker resolved (admin lookup eliminates need for channel ID config).
+None.
 
 ## Performance Metrics
 
@@ -56,5 +62,5 @@ None — Phase 9 blocker resolved (admin lookup eliminates need for channel ID c
 ## Session Continuity
 
 Last session: 2026-03-20
-Stopped at: Milestone v1.1 complete
+Stopped at: Defining requirements for v1.2
 Resume file: None
