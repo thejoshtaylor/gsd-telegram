@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-01-PLAN.md (MappingStore + GSD pure functions)
-last_updated: "2026-03-19T03:19:00Z"
+stopped_at: Completed 02-02-PLAN.md (Multi-project routing + MappingStore wiring)
+last_updated: "2026-03-20T02:50:30.604Z"
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -52,6 +52,7 @@ Plan: 2 of 4
 | Phase 01 P08 | 12 | 1 tasks | 2 files |
 | Phase 01 P09 | 8 | 2 tasks | 2 files |
 | Phase 02 P01 | 5 | 2 tasks | 4 files |
+| Phase 02 P02 | 6 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,9 @@ Phase 2, Plan 1 (MappingStore + GSD pure functions):
 - [Phase 02-01]: ExtractLetteredOptions requires sequential letters (A→B) not merely 2+ items — prevents false positives from non-list uppercase content
 - [Phase 02-01]: BuildPhasePickerKeyboard silently skips "skipped" phases — they are not actionable
 - [Phase 02-01]: gsdOpIndex precomputed at package init for O(1) label lookup in ExtractGsdCommands
+- [Phase 02]: [Phase 02-02]: workerStarted bool field on Session replaces StartedAt heuristic — more reliable single-start guard for Worker goroutine
+- [Phase 02]: [Phase 02-02]: mapping.Path used as WorkingDir in OnQueryComplete — ties PersistenceManager per-WorkingDir trimming to per-project isolation
+- [Phase 02]: [Phase 02-02]: HandleResume filters sessions to mapping.Path when hasMapped; falls back to all channel sessions if no mapping (graceful degradation)
 
 ### Pending Todos
 
@@ -124,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T03:19:00Z
-Stopped at: Completed 02-01-PLAN.md (MappingStore + GSD pure functions)
-Resume file: .planning/phases/02-multi-project-and-gsd-integration/02-02-PLAN.md
+Last session: 2026-03-20T02:50:30.598Z
+Stopped at: Completed 02-02-PLAN.md (Multi-project routing + MappingStore wiring)
+Resume file: None

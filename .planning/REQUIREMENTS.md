@@ -30,8 +30,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Multi-Project Management
 
 - [x] **PROJ-01**: Each Telegram channel maps to exactly one project (working directory)
-- [ ] **PROJ-02**: Each project has its own independent Claude CLI session running simultaneously
-- [ ] **PROJ-03**: When bot receives a message from an unassigned channel, it prompts user to link a project
+- [x] **PROJ-02**: Each project has its own independent Claude CLI session running simultaneously
+- [x] **PROJ-03**: When bot receives a message from an unassigned channel, it prompts user to link a project
 - [x] **PROJ-04**: Project-channel mappings persist to JSON file and survive restarts
 - [x] **PROJ-05**: User can reassign or unlink a channel from a project
 
@@ -130,8 +130,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-07 | Phase 1 | Complete |
 | SESS-08 | Phase 1 | Complete |
 | PROJ-01 | Phase 2 | Complete |
-| PROJ-02 | Phase 2 | Pending |
-| PROJ-03 | Phase 2 | Pending |
+| PROJ-02 | Phase 2 | Complete |
+| PROJ-03 | Phase 2 | Complete |
 | PROJ-04 | Phase 2 | Complete |
 | PROJ-05 | Phase 2 | Complete |
 | AUTH-01 | Phase 1 | Complete |
