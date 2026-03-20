@@ -114,6 +114,11 @@ Plans:
   1. Callback-triggered Claude calls (GSD buttons, resume, new) send a typing indicator while processing
   2. GSD/callback-triggered operations write entries to the audit log
   3. Voice transcripts, photo captions, document content, and GSD callback commands are checked by CheckCommandSafety before reaching Claude
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Wire typing indicators, audit logging, and safety checks into callback handler path
+- [ ] 06-02-PLAN.md — Add CheckCommandSafety to voice, photo, and document handlers
 
 ### Phase 7: Phase 3 Verification and Nyquist Compliance
 **Goal**: Formally verify Phase 3 implementation (media handlers + Windows Service) that was executed but never verified, update Phase 3 roadmap status, and achieve Nyquist compliance for Phases 3 and 4
@@ -137,5 +142,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 3. Media Handlers and Windows Service | 1/4 | In Progress | - |
 | 4. Callback Handler Integration Fixes | 1/1 | Complete   | 2026-03-20 |
 | 5. Fix Session Metrics and GSD Persistence | 2/2 | Complete   | 2026-03-20 |
-| 6. Cross-Phase Safety Hardening | 0/0 | Pending | - |
+| 6. Cross-Phase Safety Hardening | 0/2 | Pending | - |
 | 7. Phase 3 Verification and Nyquist Compliance | 0/0 | Pending | - |
