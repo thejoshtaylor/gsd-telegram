@@ -18,7 +18,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 
 **Milestone Goal:** Fix auth failures in Telegram channels and resolve polling timeout errors for stable daily use.
 
-- [ ] **Phase 8: Polling Stability** - Fix HTTP client timeout so long-poll cycles complete without errors
+- [x] **Phase 8: Polling Stability** - Fix HTTP client timeout so long-poll cycles complete without errors
 - [ ] **Phase 9: Channel Auth** - Fix channel sender auth and filter reflected bot messages
 
 ## Phase Details
@@ -33,7 +33,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
   3. The timeout change is scoped to the polling call only — sendMessage and editMessage timeouts are unchanged
 **Plans:** 1 plan
 Plans:
-- [ ] 08-01-PLAN.md — Add RequestOpts.Timeout to long-poll GetUpdatesOpts
+- [x] 08-01-PLAN.md — Add RequestOpts.Timeout to long-poll GetUpdatesOpts
 
 ### Phase 9: Channel Auth
 **Goal**: Users can operate the bot from Telegram channels without auth rejections, and the bot does not echo-loop its own channel messages
@@ -50,5 +50,5 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 8. Polling Stability | v1.1 | 0/1 | Not started | - |
+| 8. Polling Stability | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 9. Channel Auth | v1.1 | 0/TBD | Not started | - |
