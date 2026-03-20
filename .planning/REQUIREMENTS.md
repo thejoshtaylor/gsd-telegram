@@ -84,42 +84,42 @@ Deferred to v1.2.x or later. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| XPORT-01 | — | Pending |
-| XPORT-02 | — | Pending |
-| XPORT-03 | — | Pending |
-| XPORT-04 | — | Pending |
-| XPORT-05 | — | Pending |
-| XPORT-06 | — | Pending |
-| PROTO-01 | — | Pending |
-| PROTO-02 | — | Pending |
-| PROTO-03 | — | Pending |
-| PROTO-04 | — | Pending |
-| PROTO-05 | — | Pending |
-| INST-01 | — | Pending |
-| INST-02 | — | Pending |
-| INST-03 | — | Pending |
-| INST-04 | — | Pending |
-| INST-05 | — | Pending |
-| INST-06 | — | Pending |
-| INST-07 | — | Pending |
-| NODE-01 | — | Pending |
-| NODE-02 | — | Pending |
-| NODE-03 | — | Pending |
-| NODE-04 | — | Pending |
-| NODE-05 | — | Pending |
-| NODE-06 | — | Pending |
-| CLEAN-01 | — | Pending |
-| CLEAN-02 | — | Pending |
-| CLEAN-03 | — | Pending |
-| CLEAN-04 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
+| XPORT-01 | Phase 11 | Pending |
+| XPORT-02 | Phase 11 | Pending |
+| XPORT-03 | Phase 11 | Pending |
+| XPORT-04 | Phase 11 | Pending |
+| XPORT-05 | Phase 11 | Pending |
+| XPORT-06 | Phase 11 | Pending |
+| PROTO-01 | Phase 10 | Pending |
+| PROTO-02 | Phase 10 | Pending |
+| PROTO-03 | Phase 13 | Pending |
+| PROTO-04 | Phase 13 | Pending |
+| PROTO-05 | Phase 13 | Pending |
+| INST-01 | Phase 13 | Pending |
+| INST-02 | Phase 13 | Pending |
+| INST-03 | Phase 13 | Pending |
+| INST-04 | Phase 13 | Pending |
+| INST-05 | Phase 13 | Pending |
+| INST-06 | Phase 13 | Pending |
+| INST-07 | Phase 13 | Pending |
+| NODE-01 | Phase 10 | Pending |
+| NODE-02 | Phase 10 | Pending |
+| NODE-03 | Phase 13 | Pending |
+| NODE-04 | Phase 13 | Pending |
+| NODE-05 | Phase 13 | Pending |
+| NODE-06 | Phase 13 | Pending |
+| CLEAN-01 | Phase 12 | Pending |
+| CLEAN-02 | Phase 12 | Pending |
+| CLEAN-03 | Phase 12 | Pending |
+| CLEAN-04 | Phase 12 | Pending |
+| DOCS-01 | Phase 14 | Pending |
+| DOCS-02 | Phase 14 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30 ⚠️
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after initial definition*
+*Last updated: 2026-03-20 after roadmap creation*
