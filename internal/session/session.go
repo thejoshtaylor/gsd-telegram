@@ -64,6 +64,10 @@ type WorkerConfig struct {
 	// OnQueryComplete is called with the new sessionID after each successful query.
 	// Used by the persistence layer to save session state to disk.
 	OnQueryComplete func(sessionID string)
+
+	// testArgs overrides the args passed to claude.NewProcess when non-nil.
+	// For testing only: allows injecting a fake process command (e.g. cat/type with NDJSON file).
+	testArgs []string
 }
 
 // Session owns the Claude session lifecycle for a single Telegram channel.
@@ -317,8 +321,13 @@ func (s *Session) processMessage(ctx context.Context, claudePath string, cfg Wor
 	s.cancelQuery = cancel
 	s.mu.Unlock()
 
-	// Build CLI args.
-	args := claude.BuildArgs(currentSessionID, cfg.AllowedPaths, "", cfg.SafetyPrompt)
+	// Build CLI args (testArgs overrides for unit tests).
+	var args []string
+	if cfg.testArgs != nil {
+		args = cfg.testArgs
+	} else {
+		args = claude.BuildArgs(currentSessionID, cfg.AllowedPaths, "", cfg.SafetyPrompt)
+	}
 
 	// Spawn the Claude subprocess.
 	proc, err := claude.NewProcess(queryCtx, claudePath, s.workingDir, msg.Text, args, cfg.FilteredEnv)
@@ -372,9 +381,15 @@ func (s *Session) processMessage(ctx context.Context, claudePath string, cfg Wor
 		}
 		s.lastError = ""
 
-		// Capture usage from the last result event.
-		// (Callback layer may have already set these via SetCurrentTool etc.,
-		//  but we also read directly from the process for completeness.)
+		// Capture usage metrics from the completed process.
+		if u := proc.LastUsage(); u != nil {
+			copyU := *u
+			s.lastUsage = &copyU
+		}
+		if pct := proc.LastContextPercent(); pct != nil {
+			copyPct := *pct
+			s.contextPercent = &copyPct
+		}
 	}
 	s.mu.Unlock()
 

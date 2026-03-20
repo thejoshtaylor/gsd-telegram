@@ -1,8 +1,14 @@
 package session
 
 import (
+	"context"
+	"encoding/json"
+	"os"
+	"runtime"
 	"testing"
 	"time"
+
+	"github.com/user/gsd-tele-go/internal/claude"
 )
 
 // TestNewSession verifies that a freshly created Session has the expected initial state.
@@ -129,5 +135,179 @@ func TestMarkInterrupt(t *testing.T) {
 
 	if !pending {
 		t.Error("expected interruptPending to be true after MarkInterrupt")
+	}
+}
+
+// writeNDJSON writes Claude NDJSON events to a temp file and returns the file path.
+// The caller is responsible for removing the file.
+func writeNDJSONTemp(t *testing.T, events []interface{}) string {
+	t.Helper()
+	f, err := os.CreateTemp("", "session-ndjson-*.jsonl")
+	if err != nil {
+		t.Fatalf("CreateTemp: %v", err)
+	}
+	for _, ev := range events {
+		b, err := json.Marshal(ev)
+		if err != nil {
+			t.Fatalf("json.Marshal: %v", err)
+		}
+		f.Write(b)
+		f.WriteString("\n")
+	}
+	f.Close()
+	return f.Name()
+}
+
+// catBin returns the command and args that cat/type a file to stdout.
+func catBin(filePath string) (string, []string) {
+	if runtime.GOOS == "windows" {
+		return "cmd.exe", []string{"/c", "type", filePath}
+	}
+	return "cat", []string{filePath}
+}
+
+// TestProcessMessageCapturesUsage verifies that after a successful processMessage,
+// sess.LastUsage() returns the UsageData from the result event.
+func TestProcessMessageCapturesUsage(t *testing.T) {
+	usage := claude.UsageData{InputTokens: 500, OutputTokens: 200}
+	evt := map[string]interface{}{
+		"type":       "result",
+		"session_id": "test-session-id",
+		"usage": map[string]interface{}{
+			"input_tokens":  500,
+			"output_tokens": 200,
+		},
+	}
+	tmpFile := writeNDJSONTemp(t, []interface{}{evt})
+	defer os.Remove(tmpFile)
+
+	bin, args := catBin(tmpFile)
+
+	sess := NewSession(".")
+	cfg := WorkerConfig{FilteredEnv: os.Environ(), testArgs: args}
+	ctx := context.Background()
+	msg := QueuedMessage{
+		Text:   "",
+		ChatID: 1,
+		ErrCh:  make(chan error, 1),
+		Callback: func(_ int64) claude.StatusCallback {
+			return func(_ claude.ClaudeEvent) error { return nil }
+		},
+	}
+
+	sess.processMessage(ctx, bin, cfg, msg)
+
+	// Drain ErrCh.
+	select {
+	case <-msg.ErrCh:
+	case <-time.After(5 * time.Second):
+		t.Fatal("processMessage timed out")
+	}
+
+	got := sess.LastUsage()
+	if got == nil {
+		t.Fatalf("LastUsage() = nil, want non-nil")
+	}
+	if got.InputTokens != usage.InputTokens {
+		t.Errorf("LastUsage().InputTokens = %d, want %d", got.InputTokens, usage.InputTokens)
+	}
+	if got.OutputTokens != usage.OutputTokens {
+		t.Errorf("LastUsage().OutputTokens = %d, want %d", got.OutputTokens, usage.OutputTokens)
+	}
+}
+
+// TestProcessMessageCapturesContextPercent verifies that after a successful processMessage,
+// sess.ContextPercent() returns the computed percentage from the result event.
+func TestProcessMessageCapturesContextPercent(t *testing.T) {
+	entry := map[string]interface{}{
+		"inputTokens":   8000,
+		"outputTokens":  2000,
+		"contextWindow": 200000,
+	}
+	entryBytes, _ := json.Marshal(entry)
+	evt := map[string]interface{}{
+		"type":       "result",
+		"session_id": "test-session-id",
+		"modelUsage": map[string]json.RawMessage{
+			"claude-sonnet": entryBytes,
+		},
+	}
+	tmpFile := writeNDJSONTemp(t, []interface{}{evt})
+	defer os.Remove(tmpFile)
+
+	bin, args := catBin(tmpFile)
+
+	sess := NewSession(".")
+	cfg := WorkerConfig{FilteredEnv: os.Environ(), testArgs: args}
+	ctx := context.Background()
+	msg := QueuedMessage{
+		Text:   "",
+		ChatID: 1,
+		ErrCh:  make(chan error, 1),
+		Callback: func(_ int64) claude.StatusCallback {
+			return func(_ claude.ClaudeEvent) error { return nil }
+		},
+	}
+
+	sess.processMessage(ctx, bin, cfg, msg)
+
+	select {
+	case <-msg.ErrCh:
+	case <-time.After(5 * time.Second):
+		t.Fatal("processMessage timed out")
+	}
+
+	pct := sess.ContextPercent()
+	if pct == nil {
+		t.Fatalf("ContextPercent() = nil, want non-nil")
+	}
+	// (8000 + 2000) * 100 / 200000 = 5
+	if *pct != 5 {
+		t.Errorf("ContextPercent() = %d, want 5", *pct)
+	}
+}
+
+// TestProcessMessageNoUsageOnContextLimit verifies that after a context limit error,
+// sess.LastUsage() and sess.ContextPercent() remain nil (not overwritten with partial data).
+func TestProcessMessageNoUsageOnContextLimit(t *testing.T) {
+	// Result event with context limit error message — triggers ErrContextLimit.
+	evt := map[string]interface{}{
+		"type":   "result",
+		"result": "prompt too long for this request",
+		"usage": map[string]interface{}{
+			"input_tokens":  9999,
+			"output_tokens": 1,
+		},
+	}
+	tmpFile := writeNDJSONTemp(t, []interface{}{evt})
+	defer os.Remove(tmpFile)
+
+	bin, args := catBin(tmpFile)
+
+	sess := NewSession(".")
+	cfg := WorkerConfig{FilteredEnv: os.Environ(), testArgs: args}
+	ctx := context.Background()
+	msg := QueuedMessage{
+		Text:   "",
+		ChatID: 1,
+		ErrCh:  make(chan error, 1),
+		Callback: func(_ int64) claude.StatusCallback {
+			return func(_ claude.ClaudeEvent) error { return nil }
+		},
+	}
+
+	sess.processMessage(ctx, bin, cfg, msg)
+
+	select {
+	case <-msg.ErrCh:
+	case <-time.After(5 * time.Second):
+		t.Fatal("processMessage timed out")
+	}
+
+	if got := sess.LastUsage(); got != nil {
+		t.Errorf("LastUsage() = %+v after context limit, want nil", got)
+	}
+	if pct := sess.ContextPercent(); pct != nil {
+		t.Errorf("ContextPercent() = %d after context limit, want nil", *pct)
 	}
 }
