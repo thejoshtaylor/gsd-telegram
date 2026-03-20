@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **SESS-01**: Bot spawns and manages Claude CLI as a subprocess with streaming JSON output
 - [ ] **SESS-02**: Bot streams Claude responses with throttled edit-in-place message updates
-- [ ] **SESS-03**: Bot displays tool execution status with emoji indicators during streaming
+- [x] **SESS-03**: Bot displays tool execution status with emoji indicators during streaming
 - [ ] **SESS-04**: User can send text messages that are routed to the channel's Claude session
 - [ ] **SESS-05**: User can interrupt a running query by sending a message prefixed with `!`
 - [ ] **SESS-06**: Bot shows context window usage as a progress bar in status messages
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-06 | Phase 1 | Pending |
 | SESS-01 | Phase 1 | Pending |
 | SESS-02 | Phase 1 | Pending |
-| SESS-03 | Phase 1 | Pending |
+| SESS-03 | Phase 1 | Complete |
 | SESS-04 | Phase 1 | Pending |
 | SESS-05 | Phase 1 | Pending |
 | SESS-06 | Phase 1 | Pending |

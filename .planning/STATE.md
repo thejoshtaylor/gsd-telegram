@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-03-PLAN.md (security subsystem)
-last_updated: "2026-03-20T00:12:38.397Z"
+stopped_at: Completed 01-05-PLAN.md (formatting package)
+last_updated: "2026-03-19T00:00:00Z"
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -24,21 +24,21 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 01 (core-bot-infrastructure) — EXECUTING
-Plan: 4 of 8
+Plan: 6 of 8
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 1
-- Average duration: 15min
-- Total execution time: 15min
+- Total plans completed: 2
+- Average duration: 20min
+- Total execution time: 40min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 1 | 15min | 15min |
+| 01 | 2 | 40min | 20min |
 
 **Recent Trend:**
 
@@ -65,6 +65,14 @@ Phase 1, Plan 3 (security subsystem):
 - IsAuthorized accepts channelID param (unused Phase 1) for Phase 2 forward-compatibility
 - filepath.ToSlash normalization on both sides for cross-platform path comparison
 
+Phase 1, Plan 5 (formatting package):
+
+- EscapeMarkdownV2 escapes backslash first (prevents double-escaping)
+- ConvertToMarkdownV2 uses NUL-byte placeholders for extracted code blocks
+- SplitMessage splits at last double-newline before limit (paragraph boundary preference)
+- FormatToolStatus outputs plain text (not HTML) for MarkdownV2 compatibility
+- Bullet detection uses only `-` prefix to avoid conflict with bold `**` pattern
+
 ### Pending Todos
 
 None yet.
@@ -79,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T00:19:00Z
-Stopped at: Completed 01-03-PLAN.md (security subsystem)
-Resume file: .planning/phases/01-core-bot-infrastructure/01-04-PLAN.md
+Last session: 2026-03-19T00:00:00Z
+Stopped at: Completed 01-05-PLAN.md (formatting package)
+Resume file: .planning/phases/01-core-bot-infrastructure/01-06-PLAN.md
