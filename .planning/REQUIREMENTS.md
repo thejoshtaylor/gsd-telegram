@@ -21,8 +21,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SESS-01**: Bot spawns and manages Claude CLI as a subprocess with streaming JSON output
 - [ ] **SESS-02**: Bot streams Claude responses with throttled edit-in-place message updates
 - [x] **SESS-03**: Bot displays tool execution status with emoji indicators during streaming
-- [ ] **SESS-04**: User can send text messages that are routed to the channel's Claude session
-- [ ] **SESS-05**: User can interrupt a running query by sending a message prefixed with `!`
+- [x] **SESS-04**: User can send text messages that are routed to the channel's Claude session
+- [x] **SESS-05**: User can interrupt a running query by sending a message prefixed with `!`
 - [ ] **SESS-06**: Bot shows context window usage as a progress bar in status messages
 - [ ] **SESS-07**: Bot tracks and displays token usage (input/output/cache) in /status
 - [x] **SESS-08**: Bot properly kills Windows process trees (taskkill /T /F) when stopping sessions
@@ -51,9 +51,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Session Persistence
 
-- [ ] **PERS-01**: Bot saves session state (session ID, working dir, conversation context) to JSON
-- [ ] **PERS-02**: Bot restores sessions automatically on restart for all mapped channels
-- [ ] **PERS-03**: Session state persists across bot crashes and service restarts
+- [x] **PERS-01**: Bot saves session state (session ID, working dir, conversation context) to JSON
+- [x] **PERS-02**: Bot restores sessions automatically on restart for all mapped channels
+- [x] **PERS-03**: Session state persists across bot crashes and service restarts
 
 ### GSD Integration
 
@@ -124,8 +124,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-01 | Phase 1 | Complete |
 | SESS-02 | Phase 1 | Pending |
 | SESS-03 | Phase 1 | Complete |
-| SESS-04 | Phase 1 | Pending |
-| SESS-05 | Phase 1 | Pending |
+| SESS-04 | Phase 1 | Complete |
+| SESS-05 | Phase 1 | Complete |
 | SESS-06 | Phase 1 | Pending |
 | SESS-07 | Phase 1 | Pending |
 | SESS-08 | Phase 1 | Complete |
@@ -142,9 +142,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CMD-03 | Phase 1 | Pending |
 | CMD-04 | Phase 1 | Pending |
 | CMD-05 | Phase 1 | Pending |
-| PERS-01 | Phase 1 | Pending |
-| PERS-02 | Phase 1 | Pending |
-| PERS-03 | Phase 1 | Pending |
+| PERS-01 | Phase 1 | Complete |
+| PERS-02 | Phase 1 | Complete |
+| PERS-03 | Phase 1 | Complete |
 | GSD-01 | Phase 2 | Pending |
 | GSD-02 | Phase 2 | Pending |
 | GSD-03 | Phase 2 | Pending |

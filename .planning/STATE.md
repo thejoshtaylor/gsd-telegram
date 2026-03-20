@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-02-PLAN.md (Claude CLI subprocess layer)
-last_updated: "2026-03-20T00:21:36Z"
+stopped_at: Completed 01-04-PLAN.md (session management package)
+last_updated: "2026-03-20T00:34:15.341Z"
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 8
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -46,6 +46,7 @@ Plan: 5 of 8 (01-01, 01-02, 01-03, 01-05 complete; 01-04, 01-06, 01-07, 01-08 pe
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P04 | 22 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Phase 1, Plan 5 (formatting package):
 - SplitMessage splits at last double-newline before limit (paragraph boundary preference)
 - FormatToolStatus outputs plain text (not HTML) for MarkdownV2 compatibility
 - Bullet detection uses only `-` prefix to avoid conflict with bold `**` pattern
+- [Phase 01]: Worker goroutine started by bot layer not GetOrCreate — caller injects claudePath and WorkerConfig for decoupling
+- [Phase 01]: ErrContextLimit from Stream() clears sessionID so next message starts fresh Claude session (mirrors TypeScript auto-clear)
+- [Phase 01]: QueuedMessage.ErrCh chan error allows async error propagation from Worker to callers
 
 ### Pending Todos
 
@@ -100,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T00:21:36Z
-Stopped at: Completed 01-01-PLAN.md + 01-02-PLAN.md
-Resume file: .planning/phases/01-core-bot-infrastructure/01-04-PLAN.md
+Last session: 2026-03-20T00:34:15.334Z
+Stopped at: Completed 01-04-PLAN.md (session management package)
+Resume file: None
