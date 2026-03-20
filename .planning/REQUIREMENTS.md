@@ -65,16 +65,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Media Handling
 
-- [ ] **MEDIA-01**: User can send voice messages; bot transcribes via OpenAI Whisper and processes as text
-- [ ] **MEDIA-02**: User can send photos; bot forwards to Claude for visual analysis
-- [ ] **MEDIA-03**: Bot buffers photo albums (media groups) with a timeout before sending as a batch
-- [ ] **MEDIA-04**: User can send PDF documents; bot extracts text via pdftotext and sends to Claude
-- [ ] **MEDIA-05**: User can send text/code files as documents; bot reads content and sends to Claude
+- [x] **MEDIA-01**: User can send voice messages; bot transcribes via OpenAI Whisper and processes as text
+- [x] **MEDIA-02**: User can send photos; bot forwards to Claude for visual analysis
+- [x] **MEDIA-03**: Bot buffers photo albums (media groups) with a timeout before sending as a batch
+- [x] **MEDIA-04**: User can send PDF documents; bot extracts text via pdftotext and sends to Claude
+- [x] **MEDIA-05**: User can send text/code files as documents; bot reads content and sends to Claude
 
 ### Deployment
 
 - [x] **DEPLOY-01**: Bot compiles to a single Go binary (.exe) for Windows
-- [ ] **DEPLOY-02**: Bot installs as a Windows Service (runs at boot, no terminal window)
+- [x] **DEPLOY-02**: Bot installs as a Windows Service (runs at boot, no terminal window)
 - [x] **DEPLOY-03**: Bot resolves external tool paths (claude, pdftotext) explicitly at startup, not via PATH lookup
 - [x] **DEPLOY-04**: Bot supports graceful shutdown — drains active sessions before stopping
 
@@ -150,13 +150,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GSD-03 | Phase 2 | Complete |
 | GSD-04 | Phase 2 | Complete |
 | GSD-05 | Phase 2 | Complete |
-| MEDIA-01 | Phase 7 | Pending |
-| MEDIA-02 | Phase 7 | Pending |
-| MEDIA-03 | Phase 7 | Pending |
-| MEDIA-04 | Phase 7 | Pending |
-| MEDIA-05 | Phase 7 | Pending |
+| MEDIA-01 | Phase 7 | Complete |
+| MEDIA-02 | Phase 7 | Complete |
+| MEDIA-03 | Phase 7 | Complete |
+| MEDIA-04 | Phase 7 | Complete |
+| MEDIA-05 | Phase 7 | Complete |
 | DEPLOY-01 | Phase 1 | Complete |
-| DEPLOY-02 | Phase 7 | Pending |
+| DEPLOY-02 | Phase 7 | Complete |
 | DEPLOY-03 | Phase 1 | Complete |
 | DEPLOY-04 | Phase 1 | Complete |
 
