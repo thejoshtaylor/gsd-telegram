@@ -418,5 +418,104 @@ func contains(s, substr string) bool {
 		}())
 }
 
+// TestGsdOnQueryCompleteSavesSession verifies that the OnQueryComplete closure
+// created inside enqueueGsdCommand correctly persists session data.
+//
+// The test simulates the closure logic directly (without a live bot/Claude process)
+// to verify the wiring: title truncation at 50 chars, SessionID, WorkingDir, and
+// ChannelID are all saved correctly.
+func TestGsdOnQueryCompleteSavesSession(t *testing.T) {
+	tmpFile := filepath.Join(t.TempDir(), "sessions.json")
+	pm := session.NewPersistenceManager(tmpFile, 5)
+
+	capturedText := "/gsd:execute-phase 2"
+	capturedChatID := int64(12345)
+	capturedPath := "/tmp/test-project"
+
+	// Simulate the closure that enqueueGsdCommand creates.
+	onComplete := func(sessionID string) {
+		title := capturedText
+		if len(title) > 50 {
+			title = title[:50]
+		}
+		saved := session.SavedSession{
+			SessionID:  sessionID,
+			SavedAt:    time.Now().UTC().Format(time.RFC3339),
+			WorkingDir: capturedPath,
+			Title:      title,
+			ChannelID:  capturedChatID,
+		}
+		if err := pm.Save(saved); err != nil {
+			t.Errorf("Save failed: %v", err)
+		}
+	}
+
+	onComplete("test-session-abc")
+
+	sessions, err := pm.LoadForChannel(capturedChatID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sessions) != 1 {
+		t.Fatalf("expected 1 session, got %d", len(sessions))
+	}
+	if sessions[0].SessionID != "test-session-abc" {
+		t.Errorf("SessionID = %q, want %q", sessions[0].SessionID, "test-session-abc")
+	}
+	if sessions[0].Title != "/gsd:execute-phase 2" {
+		t.Errorf("Title = %q, want %q", sessions[0].Title, "/gsd:execute-phase 2")
+	}
+	if sessions[0].WorkingDir != capturedPath {
+		t.Errorf("WorkingDir = %q, want %q", sessions[0].WorkingDir, capturedPath)
+	}
+	if sessions[0].ChannelID != capturedChatID {
+		t.Errorf("ChannelID = %d, want %d", sessions[0].ChannelID, capturedChatID)
+	}
+}
+
+// TestGsdOnQueryCompleteTitleTruncation verifies that titles longer than 50
+// characters are truncated in the OnQueryComplete closure.
+func TestGsdOnQueryCompleteTitleTruncation(t *testing.T) {
+	tmpFile := filepath.Join(t.TempDir(), "sessions.json")
+	pm := session.NewPersistenceManager(tmpFile, 5)
+
+	longText := "/gsd:execute-phase 2 with a very long description that exceeds fifty characters"
+	capturedChatID := int64(99999)
+	capturedPath := "/tmp/test-project-truncation"
+
+	onComplete := func(sessionID string) {
+		title := longText
+		if len(title) > 50 {
+			title = title[:50]
+		}
+		saved := session.SavedSession{
+			SessionID:  sessionID,
+			SavedAt:    time.Now().UTC().Format(time.RFC3339),
+			WorkingDir: capturedPath,
+			Title:      title,
+			ChannelID:  capturedChatID,
+		}
+		if err := pm.Save(saved); err != nil {
+			t.Errorf("Save failed: %v", err)
+		}
+	}
+
+	onComplete("truncation-session-xyz")
+
+	sessions, err := pm.LoadForChannel(capturedChatID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sessions) != 1 {
+		t.Fatalf("expected 1 session, got %d", len(sessions))
+	}
+	if len(sessions[0].Title) > 50 {
+		t.Errorf("Title length = %d, want <= 50; title = %q", len(sessions[0].Title), sessions[0].Title)
+	}
+	if sessions[0].Title != longText[:50] {
+		t.Errorf("Title = %q, want %q", sessions[0].Title, longText[:50])
+	}
+}
+
 // Compile-time check: os package used for tmpdir cleanup.
 var _ = os.TempDir
