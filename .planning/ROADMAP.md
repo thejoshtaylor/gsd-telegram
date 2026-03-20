@@ -19,7 +19,7 @@ See [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) for full phase deta
 **Milestone Goal:** Fix auth failures in Telegram channels and resolve polling timeout errors for stable daily use.
 
 - [x] **Phase 8: Polling Stability** - Fix HTTP client timeout so long-poll cycles complete without errors
-- [ ] **Phase 9: Channel Auth** - Fix channel sender auth and filter reflected bot messages
+- [x] **Phase 9: Channel Auth** - Fix channel sender auth and filter reflected bot messages (completed 2026-03-20)
 
 ## Phase Details
 
@@ -44,13 +44,13 @@ Plans:
   2. A message sent in an unauthorized channel is rejected without the bot posting a visible rejection message into the channel timeline
   3. The bot does not process its own messages reflected back as ChannelPost updates (no echo loop)
   4. Private-chat and group messages from authorized human users continue to pass auth without any behavior change
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 09-01-PLAN.md — Add echo filter, channel auth via admin lookup with cache
+- [x] 09-01-PLAN.md — Add echo filter, channel auth via admin lookup with cache
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 8. Polling Stability | v1.1 | 1/1 | Complete | 2026-03-20 |
-| 9. Channel Auth | v1.1 | 0/1 | Not started | - |
+| 9. Channel Auth | v1.1 | 1/1 | Complete   | 2026-03-20 |

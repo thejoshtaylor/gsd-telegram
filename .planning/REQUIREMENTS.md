@@ -9,8 +9,8 @@ Requirements for bugfix release. Each maps to roadmap phases.
 
 ### Channel Auth
 
-- [ ] **AUTH-01**: Bot correctly authorizes messages in Telegram channels where sender is the channel itself (non-user sender)
-- [ ] **AUTH-02**: Bot filters its own messages reflected back as ChannelPost updates without processing them
+- [x] **AUTH-01**: Bot correctly authorizes messages in Telegram channels where sender is the channel itself (non-user sender)
+- [x] **AUTH-02**: Bot filters its own messages reflected back as ChannelPost updates without processing them
 
 ### Polling Stability
 
@@ -42,8 +42,8 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 9 | Pending |
-| AUTH-02 | Phase 9 | Pending |
+| AUTH-01 | Phase 9 | Complete |
+| AUTH-02 | Phase 9 | Complete |
 | POLL-01 | Phase 8 | Complete |
 
 **Coverage:**
