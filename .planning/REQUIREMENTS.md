@@ -23,8 +23,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SESS-03**: Bot displays tool execution status with emoji indicators during streaming
 - [x] **SESS-04**: User can send text messages that are routed to the channel's Claude session
 - [x] **SESS-05**: User can interrupt a running query by sending a message prefixed with `!`
-- [ ] **SESS-06**: Bot shows context window usage as a progress bar in status messages
-- [ ] **SESS-07**: Bot tracks and displays token usage (input/output/cache) in /status
+- [x] **SESS-06**: Bot shows context window usage as a progress bar in status messages
+- [x] **SESS-07**: Bot tracks and displays token usage (input/output/cache) in /status
 - [x] **SESS-08**: Bot properly kills Windows process trees (taskkill /T /F) when stopping sessions
 
 ### Multi-Project Management
@@ -126,8 +126,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-03 | Phase 1 | Complete |
 | SESS-04 | Phase 1 | Complete |
 | SESS-05 | Phase 1 | Complete |
-| SESS-06 | Phase 5 | Pending |
-| SESS-07 | Phase 5 | Pending |
+| SESS-06 | Phase 5 | Complete |
+| SESS-07 | Phase 5 | Complete |
 | SESS-08 | Phase 1 | Complete |
 | PROJ-01 | Phase 2 | Complete |
 | PROJ-02 | Phase 2 | Complete |

@@ -14,7 +14,7 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
 - [x] **Phase 2: Multi-Project and GSD Integration** - Multiple independent Claude sessions across channels with full GSD workflow keyboard (completed 2026-03-20)
 - [ ] **Phase 3: Media Handlers and Windows Service** - Voice, photo, PDF processing and Windows Service deployment
 - [x] **Phase 4: Callback Handler Integration Fixes** - Fix WaitGroup tracking, wrong working directory, and missing rate limiter in callback handlers (completed 2026-03-20)
-- [ ] **Phase 5: Fix Session Metrics and GSD Persistence** - Capture token/context data into session fields and wire OnQueryComplete into GSD callback path
+- [x] **Phase 5: Fix Session Metrics and GSD Persistence** - Capture token/context data into session fields and wire OnQueryComplete into GSD callback path (completed 2026-03-20)
 - [ ] **Phase 6: Cross-Phase Safety Hardening** - Add typing indicators, audit logging, and command safety checks to all message paths
 - [ ] **Phase 7: Phase 3 Verification and Nyquist Compliance** - Formal verification of Phase 3, roadmap status update, Nyquist compliance
 
@@ -99,7 +99,7 @@ Plans:
   1. After a query completes, /status shows non-zero input/output/cache token counts matching the last Claude response
   2. After a query completes, /status shows a context window usage percentage that reflects actual usage
   3. A GSD command triggered via inline keyboard button results in the session being persisted — it appears in /resume
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 05-01-PLAN.md — Capture token usage and context percent from Process into Session fields
@@ -136,6 +136,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 2. Multi-Project and GSD Integration | 4/4 | Complete   | 2026-03-20 |
 | 3. Media Handlers and Windows Service | 1/4 | In Progress | - |
 | 4. Callback Handler Integration Fixes | 1/1 | Complete   | 2026-03-20 |
-| 5. Fix Session Metrics and GSD Persistence | 1/2 | In Progress|  |
+| 5. Fix Session Metrics and GSD Persistence | 2/2 | Complete   | 2026-03-20 |
 | 6. Cross-Phase Safety Hardening | 0/0 | Pending | - |
 | 7. Phase 3 Verification and Nyquist Compliance | 0/0 | Pending | - |

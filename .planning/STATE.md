@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-20T08:38:24.014Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-20T08:41:16.647Z"
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 20
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -61,6 +61,7 @@ Plan: 1 of 2
 | Phase 03 P04 | 2 | 3 tasks | 2 files |
 | Phase 04 P01 | 15 | 2 tasks | 4 files |
 | Phase 05 P02 | 12 | 2 tasks | 4 files |
+| Phase 05 P01 | 6 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,8 @@ Phase 2, Plan 1 (MappingStore + GSD pure functions):
 - [Phase 04]: HandleGsd in command.go also needed globalLimiter param (called enqueueGsdCommand) — auto-fixed as Rule 3 blocking issue
 - [Phase 04]: cfg.WorkingDir retained as fallback in handleCallbackResume/New matching command.go canonical pattern
 - [Phase 05]: HandleGsd in command.go also needed persist param threaded — auto-fixed Rule 3 blocking issue (same pattern as Phase 04)
+- [Phase 05-01]: testArgs unexported field on WorkerConfig injects fake process command for tests without changing processMessage signature
+- [Phase 05-01]: Value copies (copyU := *u) when assigning Process pointer fields to Session prevent aliasing — Process is ephemeral, Session is long-lived
 
 ### Pending Todos
 
@@ -155,6 +158,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T08:38:24.006Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-20T08:41:16.639Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
