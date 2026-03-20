@@ -51,10 +51,10 @@ completed: 2026-03-19
 
 ## Performance
 
-- **Duration:** 12 min
+- **Duration:** 12 min (Task 1) + smoke test verification
 - **Started:** 2026-03-19T17:38:00Z
-- **Completed:** 2026-03-19T17:50:00Z
-- **Tasks:** 1 of 2 complete (Task 2 is a blocking human-verify checkpoint)
+- **Completed:** 2026-03-19 (smoke test approved 2026-03-20)
+- **Tasks:** 2 of 2 complete
 - **Files modified:** 2
 
 ## Accomplishments
@@ -70,7 +70,7 @@ completed: 2026-03-19
 Each task was committed atomically:
 
 1. **Task 1: Create main.go entry point and .gitignore** - `8b44764` (feat)
-2. **Task 2: Smoke test the running bot end-to-end** - PENDING (blocking human-verify checkpoint)
+2. **Task 2: Smoke test the running bot end-to-end** - APPROVED (human-verify checkpoint passed)
 
 ## Files Created/Modified
 
@@ -106,30 +106,22 @@ Then run: `go run .` and follow the smoke test checklist in Task 2.
 
 ## Next Phase Readiness
 
-- Binary compiles and all tests pass — ready for smoke test with real credentials
-- Task 2 (blocking checkpoint) must be approved by human before phase is considered complete
-- Phase 2 (multi-channel, project switching) can begin once smoke test is approved
+- Binary compiles, all tests pass, and smoke test approved by human operator
+- End-to-end flow verified: text message -> Claude CLI -> streaming response -> Telegram
+- Phase 1 (core-bot-infrastructure) is complete; Phase 2 (multi-channel, project switching) is ready to begin
 
 ---
 
-## Checkpoint: Task 2 Awaiting Human Verification
+## Smoke Test Result: APPROVED
 
-**Type:** human-verify (gate: blocking)
+**Type:** human-verify checkpoint (gate: blocking) — PASSED
 
-The following checklist must be verified manually with a real Telegram token and Claude CLI:
-
-1. Create `.env` with `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`, `CLAUDE_CLI_PATH`
-2. Run: `go run .`
-3. Verify startup log shows: bot username, claude path resolved, "Bot started"
-4. Send a text message to the bot — verify streaming response appears with live updates
-5. Run `/status` — verify dashboard shows session info, tokens, context percentage
-6. Run `/stop` while a query is running — verify it stops
-7. Run `/new` — verify new session message
-8. Run `/resume` — verify inline keyboard with saved sessions
-9. Press Ctrl+C — verify "Shutting down" and clean exit
-10. Restart the bot (`go run .`) and run `/resume` — verify previous session appears (PERS-02)
-
-**To resume:** Type "approved" or describe issues found.
+Human operator approved end-to-end smoke test on 2026-03-20. The checklist was verified:
+- Bot starts and connects to Telegram with real credentials
+- Text message routing to Claude CLI with streaming response confirmed
+- All commands functional (/start, /new, /stop, /status, /resume)
+- PERS-02 verified: session survives restart and restored via /resume
+- Graceful shutdown on Ctrl+C confirmed
 
 ---
 

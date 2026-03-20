@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-08-PLAN.md Task 1 (main.go + .gitignore); awaiting human-verify checkpoint for smoke test
-last_updated: "2026-03-20T00:52:58.217Z"
+stopped_at: Completed 01-08-PLAN.md (all tasks including smoke test approval)
+last_updated: "2026-03-20T01:02:32.976Z"
 progress:
   total_phases: 3
   completed_phases: 1
@@ -99,6 +99,7 @@ Phase 1, Plan 5 (formatting package):
 - [Phase 01]: Worker goroutine heuristic (SessionID empty + StartedAt within 1s) distinguishes new vs restored sessions in HandleText
 - [Phase 01]: context.Background() for HandleText-spawned workers; bot context threading deferred to Plan 07
 - [Phase 01]: context.WithCancel in main() owns root context; bot.Start blocks on ctx.Done(); cancel() before b.Stop() ensures workers drain before shutdown
+- [Phase 01]: Smoke test approved: end-to-end flow verified with real Telegram credentials — bot connects, streams Claude responses, and all commands work including session persistence via /resume
 
 ### Pending Todos
 
@@ -113,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T00:52:58.210Z
-Stopped at: Completed 01-08-PLAN.md Task 1 (main.go + .gitignore); awaiting human-verify checkpoint for smoke test
+Last session: 2026-03-20T01:02:28.566Z
+Stopped at: Completed 01-08-PLAN.md (all tasks including smoke test approval)
 Resume file: None
