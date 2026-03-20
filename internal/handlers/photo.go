@@ -17,6 +17,7 @@ import (
 	"github.com/user/gsd-tele-go/internal/claude"
 	"github.com/user/gsd-tele-go/internal/config"
 	"github.com/user/gsd-tele-go/internal/project"
+	"github.com/user/gsd-tele-go/internal/security"
 	"github.com/user/gsd-tele-go/internal/session"
 )
 
@@ -113,6 +114,21 @@ func HandlePhoto(
 			ev.Message = "photo"
 		}
 		_ = auditLog.Log(ev)
+	}
+
+	// Command safety check on caption before sending to Claude.
+	if caption != "" {
+		safe, blockedPattern := security.CheckCommandSafety(caption, config.BlockedPatterns)
+		if !safe {
+			log.Warn().
+				Int64("chat_id", chatID).
+				Int64("user_id", userID).
+				Str("pattern", blockedPattern).
+				Msg("Blocked photo caption due to safety pattern")
+			os.Remove(photoPath)
+			_, err := tgBot.SendMessage(chatID, "Photo caption blocked for safety: "+blockedPattern, nil)
+			return err
+		}
 	}
 
 	// --- Album handling ---
