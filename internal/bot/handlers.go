@@ -97,7 +97,7 @@ func (b *Bot) handleProject(tgBot *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (b *Bot) handleCallback(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleCallback(tgBot, ctx, b.store, b.persist, b.cfg, b.mappings, b.awaitingPath, b.WaitGroup(), b.globalAPILimiter)
+	return bothandlers.HandleCallback(tgBot, ctx, b.store, b.persist, b.cfg, b.mappings, b.awaitingPath, b.WaitGroup(), b.globalAPILimiter, b.auditLog)
 }
 
 func (b *Bot) handleGsd(tgBot *gotgbot.Bot, ctx *ext.Context) error {

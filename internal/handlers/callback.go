@@ -15,9 +15,11 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/time/rate"
 
+	"github.com/user/gsd-tele-go/internal/audit"
 	"github.com/user/gsd-tele-go/internal/claude"
 	"github.com/user/gsd-tele-go/internal/config"
 	"github.com/user/gsd-tele-go/internal/project"
+	"github.com/user/gsd-tele-go/internal/security"
 	"github.com/user/gsd-tele-go/internal/session"
 )
 
@@ -107,7 +109,8 @@ func parseCallbackData(data string) (callbackAction, string) {
 func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore,
 	persist *session.PersistenceManager, cfg *config.Config,
 	mappings *project.MappingStore, awaitingPath *AwaitingPathState,
-	wg *sync.WaitGroup, globalLimiter *rate.Limiter) error {
+	wg *sync.WaitGroup, globalLimiter *rate.Limiter,
+	auditLog *audit.Logger) error {
 
 	if ctx.CallbackQuery == nil {
 		return nil
@@ -134,17 +137,20 @@ func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStor
 		return nil
 	}
 
+	// Extract userID from the callback query sender.
+	userID := cq.From.Id
+
 	action, payload := parseCallbackData(cq.Data)
 
 	switch action {
 	case callbackActionResume:
-		return handleCallbackResume(b, ctx, store, cfg, mappings, chatID, msgID, payload)
+		return handleCallbackResume(b, ctx, store, cfg, mappings, chatID, msgID, payload, auditLog, userID)
 
 	case callbackActionStop:
 		return handleCallbackStop(b, store, chatID, msgID)
 
 	case callbackActionNew:
-		return handleCallbackNew(b, store, cfg, mappings, chatID, msgID)
+		return handleCallbackNew(b, store, cfg, mappings, chatID, msgID, auditLog, userID)
 
 	case callbackActionRetry:
 		// Deferred to v2.
@@ -152,7 +158,7 @@ func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStor
 		return err
 
 	case callbackActionGsd:
-		return handleCallbackGsd(b, chatID, msgID, payload, store, mappings, cfg, persist, wg, globalLimiter)
+		return handleCallbackGsd(b, chatID, msgID, payload, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 
 	case callbackActionGsdRun:
 		if msgID != 0 {
@@ -161,7 +167,7 @@ func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStor
 				MessageId: msgID,
 			})
 		}
-		return enqueueGsdCommand(b, chatID, payload, store, mappings, cfg, persist, wg, globalLimiter)
+		return enqueueGsdCommand(b, chatID, payload, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 
 	case callbackActionGsdFresh:
 		// Fresh session: clear session ID before enqueueing.
@@ -174,10 +180,10 @@ func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStor
 				MessageId: msgID,
 			})
 		}
-		return enqueueGsdCommand(b, chatID, payload, store, mappings, cfg, persist, wg, globalLimiter)
+		return enqueueGsdCommand(b, chatID, payload, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 
 	case callbackActionGsdPhase:
-		return handleCallbackGsdPhase(b, chatID, msgID, payload, store, mappings, cfg, persist, wg, globalLimiter)
+		return handleCallbackGsdPhase(b, chatID, msgID, payload, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 
 	case callbackActionOption:
 		// Send the option key (e.g. "1", "A") directly to Claude.
@@ -187,10 +193,10 @@ func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStor
 				MessageId: msgID,
 			})
 		}
-		return enqueueGsdCommand(b, chatID, payload, store, mappings, cfg, persist, wg, globalLimiter)
+		return enqueueGsdCommand(b, chatID, payload, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 
 	case callbackActionAskUser:
-		return handleCallbackAskUser(b, chatID, msgID, payload, store, mappings, cfg, persist, wg, globalLimiter)
+		return handleCallbackAskUser(b, chatID, msgID, payload, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 
 	case callbackActionProjectChange:
 		awaitingPath.Set(chatID)
@@ -225,7 +231,8 @@ func HandleCallback(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStor
 func handleCallbackGsd(b *gotgbot.Bot, chatID, msgID int64, key string,
 	store *session.SessionStore, mappings *project.MappingStore,
 	cfg *config.Config, persist *session.PersistenceManager,
-	wg *sync.WaitGroup, globalLimiter *rate.Limiter) error {
+	wg *sync.WaitGroup, globalLimiter *rate.Limiter,
+	auditLog *audit.Logger, userID int64) error {
 
 	// Check if this operation needs a phase picker first.
 	if prefix, ok := PhasePickerOps[key]; ok {
@@ -255,7 +262,7 @@ func handleCallbackGsd(b *gotgbot.Bot, chatID, msgID int64, key string,
 			MessageId: msgID,
 		})
 	}
-	return enqueueGsdCommand(b, chatID, op.Command, store, mappings, cfg, persist, wg, globalLimiter)
+	return enqueueGsdCommand(b, chatID, op.Command, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 }
 
 // handleCallbackGsdPhase parses a phase-specific callback like "gsd-exec:2"
@@ -263,7 +270,8 @@ func handleCallbackGsd(b *gotgbot.Bot, chatID, msgID int64, key string,
 func handleCallbackGsdPhase(b *gotgbot.Bot, chatID, msgID int64, data string,
 	store *session.SessionStore, mappings *project.MappingStore,
 	cfg *config.Config, persist *session.PersistenceManager,
-	wg *sync.WaitGroup, globalLimiter *rate.Limiter) error {
+	wg *sync.WaitGroup, globalLimiter *rate.Limiter,
+	auditLog *audit.Logger, userID int64) error {
 
 	// Map callback prefix to GSD command.
 	prefixToCmd := map[string]string{
@@ -297,7 +305,7 @@ func handleCallbackGsdPhase(b *gotgbot.Bot, chatID, msgID int64, data string,
 			MessageId: msgID,
 		})
 	}
-	return enqueueGsdCommand(b, chatID, fullCmd, store, mappings, cfg, persist, wg, globalLimiter)
+	return enqueueGsdCommand(b, chatID, fullCmd, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 }
 
 // askUserRequest is the JSON structure written by the ask_user MCP tool.
@@ -313,7 +321,8 @@ type askUserRequest struct {
 func handleCallbackAskUser(b *gotgbot.Bot, chatID, msgID int64, payload string,
 	store *session.SessionStore, mappings *project.MappingStore,
 	cfg *config.Config, persist *session.PersistenceManager,
-	wg *sync.WaitGroup, globalLimiter *rate.Limiter) error {
+	wg *sync.WaitGroup, globalLimiter *rate.Limiter,
+	auditLog *audit.Logger, userID int64) error {
 
 	// Payload format: "{request_id}:{option_index}"
 	colonIdx := strings.Index(payload, ":")
@@ -367,7 +376,7 @@ func handleCallbackAskUser(b *gotgbot.Bot, chatID, msgID int64, payload string,
 	_ = os.Remove(tmpFile)
 
 	// Send the selected option to Claude.
-	return enqueueGsdCommand(b, chatID, selectedText, store, mappings, cfg, persist, wg, globalLimiter)
+	return enqueueGsdCommand(b, chatID, selectedText, store, mappings, cfg, persist, wg, globalLimiter, auditLog, userID)
 }
 
 // enqueueGsdCommand looks up the project mapping for the channel, gets or creates
@@ -378,7 +387,8 @@ func handleCallbackAskUser(b *gotgbot.Bot, chatID, msgID int64, payload string,
 func enqueueGsdCommand(b *gotgbot.Bot, chatID int64, text string,
 	store *session.SessionStore, mappings *project.MappingStore,
 	cfg *config.Config, persist *session.PersistenceManager,
-	wg *sync.WaitGroup, globalLimiter *rate.Limiter) error {
+	wg *sync.WaitGroup, globalLimiter *rate.Limiter,
+	auditLog *audit.Logger, userID int64) error {
 
 	mapping, hasMapped := mappings.Get(chatID)
 	if !hasMapped {
@@ -387,6 +397,32 @@ func enqueueGsdCommand(b *gotgbot.Bot, chatID int64, text string,
 	}
 
 	sess := store.GetOrCreate(chatID, mapping.Path)
+
+	// Audit log the callback command.
+	if auditLog != nil {
+		ev := audit.NewEvent("callback_gsd", userID, chatID)
+		excerpt := text
+		if len(excerpt) > 100 {
+			excerpt = excerpt[:100]
+		}
+		ev.Message = excerpt
+		_ = auditLog.Log(ev)
+	}
+
+	// Command safety check — reject blocked patterns before enqueueing.
+	safe, blockedPattern := security.CheckCommandSafety(text, config.BlockedPatterns)
+	if !safe {
+		log.Warn().
+			Int64("chat_id", chatID).
+			Int64("user_id", userID).
+			Str("pattern", blockedPattern).
+			Msg("Blocked callback command due to safety pattern")
+		_, err := b.SendMessage(chatID, "Command blocked for safety: "+blockedPattern, nil)
+		return err
+	}
+
+	// Start typing indicator while Claude processes.
+	typingCtl := StartTypingIndicator(b, chatID)
 
 	capturedText := text
 	capturedChatID := chatID
@@ -430,12 +466,15 @@ func enqueueGsdCommand(b *gotgbot.Bot, chatID int64, text string,
 		Text:   text,
 		ChatID: chatID,
 		Callback: func(_ int64) claude.StatusCallback {
+			// Stop typing indicator once streaming begins.
+			typingCtl.Stop()
 			return CreateStatusCallback(ss)
 		},
 		ErrCh: make(chan error, 1),
 	}
 
 	if !sess.Enqueue(qMsg) {
+		typingCtl.Stop()
 		_, err := b.SendMessage(chatID, "Queue full, please wait for the current query to finish.", nil)
 		return err
 	}
@@ -465,7 +504,8 @@ func enqueueGsdCommand(b *gotgbot.Bot, chatID int64, text string,
 // Updates the inline keyboard message to confirm the restore.
 func handleCallbackResume(b *gotgbot.Bot, _ *ext.Context, store *session.SessionStore,
 	cfg *config.Config, mappings *project.MappingStore,
-	chatID, msgID int64, sessionID string) error {
+	chatID, msgID int64, sessionID string,
+	auditLog *audit.Logger, userID int64) error {
 	if sessionID == "" {
 		_, err := b.SendMessage(chatID, "Invalid session ID.", nil)
 		return err
@@ -481,6 +521,17 @@ func handleCallbackResume(b *gotgbot.Bot, _ *ext.Context, store *session.Session
 	}
 	sess := store.GetOrCreate(chatID, workingDir)
 	sess.SetSessionID(sessionID)
+
+	// Audit log the session restore.
+	if auditLog != nil {
+		ev := audit.NewEvent("callback_resume", userID, chatID)
+		short := sessionID
+		if len(short) > 8 {
+			short = short[:8]
+		}
+		ev.Message = "session:" + short
+		_ = auditLog.Log(ev)
+	}
 
 	// Show a short prefix of the session ID for confirmation.
 	short := sessionID
@@ -528,7 +579,8 @@ func handleCallbackStop(b *gotgbot.Bot, store *session.SessionStore, chatID, msg
 // handleCallbackNew starts a fresh session (same as /new).
 func handleCallbackNew(b *gotgbot.Bot, store *session.SessionStore,
 	cfg *config.Config, mappings *project.MappingStore,
-	chatID, msgID int64) error {
+	chatID, msgID int64,
+	auditLog *audit.Logger, userID int64) error {
 	workingDir := cfg.WorkingDir
 	if m, ok := mappings.Get(chatID); ok {
 		workingDir = m.Path
@@ -544,6 +596,12 @@ func handleCallbackNew(b *gotgbot.Bot, store *session.SessionStore,
 	}
 
 	sess.SetSessionID("")
+
+	// Audit log the new session action.
+	if auditLog != nil {
+		ev := audit.NewEvent("callback_new", userID, chatID)
+		_ = auditLog.Log(ev)
+	}
 
 	if msgID != 0 {
 		_, _, _ = b.EditMessageText("New session started. Previous session saved for /resume.", &gotgbot.EditMessageTextOpts{
