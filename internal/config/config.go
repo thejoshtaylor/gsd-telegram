@@ -60,6 +60,11 @@ type Config struct {
 	// OpenAIAPIKey is the OpenAI API key for voice transcription (optional).
 	OpenAIAPIKey string
 
+	// PdfToTextPath is the resolved path to the pdftotext CLI binary (optional).
+	// If empty, PDF extraction is unavailable and the document handler replies with
+	// "PDF extraction not configured. Set PDFTOTEXT_PATH."
+	PdfToTextPath string
+
 	// RateLimitEnabled controls whether per-channel rate limiting is active.
 	RateLimitEnabled bool
 
@@ -144,6 +149,12 @@ func Load() (*Config, error) {
 
 	// --- OPENAI_API_KEY (optional) ---
 	cfg.OpenAIAPIKey = os.Getenv("OPENAI_API_KEY")
+
+	// --- PDFTOTEXT_PATH (optional) ---
+	cfg.PdfToTextPath = os.Getenv("PDFTOTEXT_PATH")
+	if cfg.PdfToTextPath != "" {
+		log.Info().Str("pdftotext_path", cfg.PdfToTextPath).Msg("pdftotext path configured")
+	}
 
 	// --- RATE_LIMIT_ENABLED (default: true) ---
 	rateLimitEnabledStr := os.Getenv("RATE_LIMIT_ENABLED")

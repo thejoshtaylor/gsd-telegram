@@ -227,5 +227,40 @@ func TestBlockedPatterns(t *testing.T) {
 	}
 }
 
+// TestLoadConfig_PdfToTextPath verifies that PDFTOTEXT_PATH env var is parsed into PdfToTextPath.
+func TestLoadConfig_PdfToTextPath(t *testing.T) {
+	setEnv(t, map[string]string{
+		"TELEGRAM_BOT_TOKEN":    "test-token",
+		"TELEGRAM_ALLOWED_USERS": "999",
+		"PDFTOTEXT_PATH":        "/usr/bin/pdftotext",
+	})
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned error: %v", err)
+	}
+	if cfg.PdfToTextPath != "/usr/bin/pdftotext" {
+		t.Errorf("PdfToTextPath = %q, want %q", cfg.PdfToTextPath, "/usr/bin/pdftotext")
+	}
+}
+
+// TestLoadConfig_PdfToTextPathMissing verifies that Load() succeeds when PDFTOTEXT_PATH is not set.
+func TestLoadConfig_PdfToTextPathMissing(t *testing.T) {
+	setEnv(t, map[string]string{
+		"TELEGRAM_BOT_TOKEN":    "test-token",
+		"TELEGRAM_ALLOWED_USERS": "999",
+	})
+	// Ensure PDFTOTEXT_PATH is not set.
+	t.Setenv("PDFTOTEXT_PATH", "")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() returned error: %v", err)
+	}
+	if cfg.PdfToTextPath != "" {
+		t.Errorf("PdfToTextPath = %q, want empty string when PDFTOTEXT_PATH is not set", cfg.PdfToTextPath)
+	}
+}
+
 // Ensure os is used (needed for UserHomeDir in Load).
 var _ = os.UserHomeDir
