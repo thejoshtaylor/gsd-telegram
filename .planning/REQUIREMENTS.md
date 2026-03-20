@@ -14,7 +14,7 @@ Requirements for bugfix release. Each maps to roadmap phases.
 
 ### Polling Stability
 
-- [ ] **POLL-01**: Long-polling getUpdates requests do not produce `context deadline exceeded` errors under normal operation
+- [x] **POLL-01**: Long-polling getUpdates requests do not produce `context deadline exceeded` errors under normal operation
 
 ## Future Requirements
 
@@ -44,7 +44,7 @@ Deferred to future release. Tracked but not in current roadmap.
 |-------------|-------|--------|
 | AUTH-01 | Phase 9 | Pending |
 | AUTH-02 | Phase 9 | Pending |
-| POLL-01 | Phase 8 | Pending |
+| POLL-01 | Phase 8 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 3 total
