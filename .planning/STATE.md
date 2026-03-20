@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-06-PLAN.md (bot skeleton, middleware, streaming, text handler)
-last_updated: "2026-03-20T00:48:27.002Z"
+stopped_at: Completed 01-08-PLAN.md Task 1 (main.go + .gitignore); awaiting human-verify checkpoint for smoke test
+last_updated: "2026-03-20T00:52:58.217Z"
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -49,6 +49,7 @@ Plan: 5 of 8 (01-01, 01-02, 01-03, 01-05 complete; 01-04, 01-06, 01-07, 01-08 pe
 | Phase 01 P04 | 22 | 2 tasks | 6 files |
 | Phase 01 P07 | 7 | 2 tasks | 4 files |
 | Phase 01 P06 | 35 | 3 tasks | 8 files |
+| Phase 01 P08 | 12 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Phase 1, Plan 5 (formatting package):
 - [Phase 01]: Interface-based AuthChecker/RateLimitChecker in middleware enables unit testing without live Telegram connection
 - [Phase 01]: Worker goroutine heuristic (SessionID empty + StartedAt within 1s) distinguishes new vs restored sessions in HandleText
 - [Phase 01]: context.Background() for HandleText-spawned workers; bot context threading deferred to Plan 07
+- [Phase 01]: context.WithCancel in main() owns root context; bot.Start blocks on ctx.Done(); cancel() before b.Stop() ensures workers drain before shutdown
 
 ### Pending Todos
 
@@ -111,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T00:48:26.995Z
-Stopped at: Completed 01-06-PLAN.md (bot skeleton, middleware, streaming, text handler)
+Last session: 2026-03-20T00:52:58.210Z
+Stopped at: Completed 01-08-PLAN.md Task 1 (main.go + .gitignore); awaiting human-verify checkpoint for smoke test
 Resume file: None

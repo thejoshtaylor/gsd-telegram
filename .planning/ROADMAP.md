@@ -10,7 +10,7 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Core Bot Infrastructure** - Single-channel bot that sends text to Claude and streams the response back, with all safety and persistence infrastructure correct
+- [x] **Phase 1: Core Bot Infrastructure** - Single-channel bot that sends text to Claude and streams the response back, with all safety and persistence infrastructure correct (completed 2026-03-20)
 - [ ] **Phase 2: Multi-Project and GSD Integration** - Multiple independent Claude sessions across channels with full GSD workflow keyboard
 - [ ] **Phase 3: Media Handlers and Windows Service** - Voice, photo, PDF processing and Windows Service deployment
 
@@ -26,7 +26,7 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
   3. Bot survives a restart and automatically restores the previous session — user can resume without re-sending their message
   4. Bot rejects messages from users not in the channel, enforces rate limits per channel, and blocks forbidden path patterns before passing them to Claude
   5. Go binary compiles for Windows, resolves claude and pdftotext paths explicitly at startup (logged), and shuts down cleanly draining active sessions
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Go module init, config package, audit logger
@@ -68,6 +68,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Bot Infrastructure | 7/8 | In Progress|  |
+| 1. Core Bot Infrastructure | 8/8 | Complete   | 2026-03-20 |
 | 2. Multi-Project and GSD Integration | 0/TBD | Not started | - |
 | 3. Media Handlers and Windows Service | 0/TBD | Not started | - |

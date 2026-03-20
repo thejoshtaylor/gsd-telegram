@@ -73,7 +73,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Deployment
 
-- [ ] **DEPLOY-01**: Bot compiles to a single Go binary (.exe) for Windows
+- [x] **DEPLOY-01**: Bot compiles to a single Go binary (.exe) for Windows
 - [ ] **DEPLOY-02**: Bot installs as a Windows Service (runs at boot, no terminal window)
 - [x] **DEPLOY-03**: Bot resolves external tool paths (claude, pdftotext) explicitly at startup, not via PATH lookup
 - [x] **DEPLOY-04**: Bot supports graceful shutdown — drains active sessions before stopping
@@ -155,7 +155,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MEDIA-03 | Phase 3 | Pending |
 | MEDIA-04 | Phase 3 | Pending |
 | MEDIA-05 | Phase 3 | Pending |
-| DEPLOY-01 | Phase 1 | Pending |
+| DEPLOY-01 | Phase 1 | Complete |
 | DEPLOY-02 | Phase 3 | Pending |
 | DEPLOY-03 | Phase 1 | Complete |
 | DEPLOY-04 | Phase 1 | Complete |
