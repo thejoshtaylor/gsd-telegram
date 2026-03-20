@@ -388,8 +388,8 @@ func StripMarkdown(text string) string {
 	text = strings.Join(lines, "\n")
 
 	// Remove bold: **text** -> text, __text__ -> text
-	text = replacePair(text, "**", "")
-	text = replacePair(text, "__", "")
+	text = replacePair(text, "**")
+	text = replacePair(text, "__")
 
 	// Remove italic: _text_ -> text, *text* -> text
 	text = replaceSingle(text, '_')
