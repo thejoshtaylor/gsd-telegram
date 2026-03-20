@@ -38,10 +38,10 @@ created: 2026-03-19
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 04-01-01 | 01 | 0 | DEPLOY-04 | unit | `go test ./internal/handlers/... -run TestEnqueueGsdCommand_WgTracked` | ❌ W0 | ⬜ pending |
-| 04-01-02 | 01 | 0 | PROJ-01, PROJ-03, PERS-03 | unit | `go test ./internal/handlers/... -run TestHandleCallbackResume_UsesMapping` | ❌ W0 | ⬜ pending |
-| 04-01-03 | 01 | 0 | PROJ-01, PROJ-03, PERS-03 | unit | `go test ./internal/handlers/... -run TestHandleCallbackNew_UsesMapping` | ❌ W0 | ⬜ pending |
-| 04-01-04 | 01 | 0 | CORE-06 | unit | `go test ./internal/handlers/... -run TestEnqueueGsdCommand_RateLimiter` | ❌ W0 | ⬜ pending |
+| 04-01-01 | 01 | 0 | DEPLOY-04 | unit | `go test ./internal/handlers/... -run TestEnqueueGsdCommand_UsesInjectedWg` | ❌ W0 | ⬜ pending |
+| 04-01-02 | 01 | 0 | PROJ-01, PROJ-03, PERS-03 | unit | `go test ./internal/handlers/... -run TestCallbackResume_UsesMapping` | ❌ W0 | ⬜ pending |
+| 04-01-03 | 01 | 0 | PROJ-01, PROJ-03, PERS-03 | unit | `go test ./internal/handlers/... -run TestCallbackNew_UsesMapping` | ❌ W0 | ⬜ pending |
+| 04-01-04 | 01 | 0 | CORE-06 | unit | `go test ./internal/handlers/... -run TestEnqueueGsdCommand_GlobalLimiterCompile` | ❌ W0 | ⬜ pending |
 | 04-01-05 | 01 | 1 | ALL | build | `go build ./...` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
