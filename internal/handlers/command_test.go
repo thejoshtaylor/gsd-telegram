@@ -142,7 +142,9 @@ func TestFormatSessionLabel(t *testing.T) {
 	if !strings.Contains(label, "2026-03-15") {
 		t.Errorf("expected date in label, got: %s", label)
 	}
-	if !strings.Contains(label, "Fix the authentication bug in the") {
+	// Title is "Fix the authentication bug in the login" (39 chars).
+	// ButtonLabelMaxLength is 30, so truncated to "Fix the authentication bug in ".
+	if !strings.Contains(label, "Fix the authentication bug in") {
 		t.Errorf("expected truncated title in label, got: %s", label)
 	}
 }
