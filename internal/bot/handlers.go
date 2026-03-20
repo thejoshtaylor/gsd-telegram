@@ -4,6 +4,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 
 	bothandlers "github.com/user/gsd-tele-go/internal/handlers"
@@ -33,12 +34,15 @@ func (b *Bot) registerHandlers(dispatcher *ext.Dispatcher) {
 	// --- Text message handler ---
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, b.handleText))
 
-	// --- Command handlers (placeholder implementations) ---
+	// --- Command handlers ---
 	dispatcher.AddHandler(handlers.NewCommand("start", b.handleStart))
 	dispatcher.AddHandler(handlers.NewCommand("new", b.handleNew))
 	dispatcher.AddHandler(handlers.NewCommand("stop", b.handleStop))
 	dispatcher.AddHandler(handlers.NewCommand("status", b.handleStatus))
 	dispatcher.AddHandler(handlers.NewCommand("resume", b.handleResume))
+
+	// --- Callback query handler ---
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, b.handleCallback))
 }
 
 // handleText is the bot-layer wrapper that calls the handlers.HandleText function.
@@ -46,42 +50,28 @@ func (b *Bot) handleText(tgBot *gotgbot.Bot, ctx *ext.Context) error {
 	return bothandlers.HandleText(tgBot, ctx, b.store, b.cfg, b.auditLog, b.persist, b.WaitGroup())
 }
 
-// --- Placeholder command handlers ---
-// These are stub implementations that will be replaced in Plan 07 (command handlers).
-
 func (b *Bot) handleStart(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveMessage != nil {
-		_, _ = ctx.EffectiveMessage.Reply(tgBot, "Bot is running. Send a message to start.", nil)
-	}
-	return nil
+	return bothandlers.HandleStart(tgBot, ctx, b.store, b.cfg)
 }
 
 func (b *Bot) handleNew(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveMessage != nil {
-		_, _ = ctx.EffectiveMessage.Reply(tgBot, "/new — not yet implemented.", nil)
-	}
-	return nil
+	return bothandlers.HandleNew(tgBot, ctx, b.store, b.persist, b.cfg)
 }
 
 func (b *Bot) handleStop(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveMessage != nil {
-		_, _ = ctx.EffectiveMessage.Reply(tgBot, "/stop — not yet implemented.", nil)
-	}
-	return nil
+	return bothandlers.HandleStop(tgBot, ctx, b.store)
 }
 
 func (b *Bot) handleStatus(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveMessage != nil {
-		_, _ = ctx.EffectiveMessage.Reply(tgBot, "/status — not yet implemented.", nil)
-	}
-	return nil
+	return bothandlers.HandleStatus(tgBot, ctx, b.store, b.cfg)
 }
 
 func (b *Bot) handleResume(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveMessage != nil {
-		_, _ = ctx.EffectiveMessage.Reply(tgBot, "/resume — not yet implemented.", nil)
-	}
-	return nil
+	return bothandlers.HandleResume(tgBot, ctx, b.persist)
+}
+
+func (b *Bot) handleCallback(tgBot *gotgbot.Bot, ctx *ext.Context) error {
+	return bothandlers.HandleCallback(tgBot, ctx, b.store, b.persist, b.cfg)
 }
 
 // passthroughHandler is a no-op handler used as the terminal target for middleware
