@@ -1,0 +1,56 @@
+# Requirements: GSD Telegram Bot (Go Rewrite)
+
+**Defined:** 2026-03-20
+**Core Value:** Control Claude Code remotely from Telegram across multiple projects simultaneously, each in its own channel with its own Claude session.
+
+## v1.1 Requirements
+
+Requirements for bugfix release. Each maps to roadmap phases.
+
+### Channel Auth
+
+- [ ] **AUTH-01**: Bot correctly authorizes messages in Telegram channels where sender is the channel itself (non-user sender)
+- [ ] **AUTH-02**: Bot filters its own messages reflected back as ChannelPost updates without processing them
+
+### Polling Stability
+
+- [ ] **POLL-01**: Long-polling getUpdates requests do not produce `context deadline exceeded` errors under normal operation
+
+## Future Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Channel Auth Hardening
+
+- **AUTH-03**: Auth rejection message is suppressed in public channel timelines (reply-into-channel regression)
+
+### Media
+
+- **MEDIA-06**: Video file transcription
+- **MEDIA-07**: Audio file transcription improvements
+- **MEDIA-08**: Archive file extraction
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Per-channel membership auth | JSON allowlist sufficient for single-operator bot |
+| AllowChannel handler flag | Bot receives channel posts via middleware, not message handlers |
+| Anonymous admin auth | Not a reported issue; defer unless surfaced |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| AUTH-01 | — | Pending |
+| AUTH-02 | — | Pending |
+| POLL-01 | — | Pending |
+
+**Coverage:**
+- v1.1 requirements: 3 total
+- Mapped to phases: 0
+- Unmapped: 3 ⚠️
+
+---
+*Requirements defined: 2026-03-20*
+*Last updated: 2026-03-20 after initial definition*
