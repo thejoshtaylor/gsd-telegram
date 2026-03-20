@@ -14,21 +14,25 @@ import (
 
 	"github.com/user/gsd-tele-go/internal/audit"
 	"github.com/user/gsd-tele-go/internal/config"
+	bothandlers "github.com/user/gsd-tele-go/internal/handlers"
+	"github.com/user/gsd-tele-go/internal/project"
 	"github.com/user/gsd-tele-go/internal/security"
 	"github.com/user/gsd-tele-go/internal/session"
 )
 
 // Bot owns the Telegram bot lifecycle: polling, middleware, session management, and shutdown.
 type Bot struct {
-	bot         *gotgbot.Bot
-	updater     *ext.Updater
-	cfg         *config.Config
-	store       *session.SessionStore
-	persist     *session.PersistenceManager
-	rateLimiter *security.ChannelRateLimiter
-	auditLog    *audit.Logger
-	cancelFunc  context.CancelFunc
-	wg          sync.WaitGroup // tracks active session worker goroutines
+	bot          *gotgbot.Bot
+	updater      *ext.Updater
+	cfg          *config.Config
+	store        *session.SessionStore
+	persist      *session.PersistenceManager
+	rateLimiter  *security.ChannelRateLimiter
+	auditLog     *audit.Logger
+	cancelFunc   context.CancelFunc
+	wg           sync.WaitGroup // tracks active session worker goroutines
+	mappings     *project.MappingStore
+	awaitingPath *bothandlers.AwaitingPathState
 }
 
 // New creates and initialises a Bot from the given Config.
@@ -58,13 +62,21 @@ func New(cfg *config.Config) (*Bot, error) {
 		return nil, err
 	}
 
+	// MappingStore: load channel-to-project mappings from disk.
+	mappings := project.NewMappingStore(filepath.Join(cfg.DataDir, "mappings.json"))
+	if err := mappings.Load(); err != nil {
+		log.Warn().Err(err).Msg("Failed to load mappings; starting with empty")
+	}
+
 	b := &Bot{
-		bot:         tgBot,
-		cfg:         cfg,
-		store:       store,
-		persist:     persist,
-		rateLimiter: rateLimiter,
-		auditLog:    auditLog,
+		bot:          tgBot,
+		cfg:          cfg,
+		store:        store,
+		persist:      persist,
+		rateLimiter:  rateLimiter,
+		auditLog:     auditLog,
+		mappings:     mappings,
+		awaitingPath: bothandlers.NewAwaitingPathState(),
 	}
 
 	log.Info().
@@ -166,6 +178,9 @@ func (b *Bot) WaitGroup() *sync.WaitGroup {
 // restoreSessions loads saved session history and recreates in-memory sessions
 // for each unique channel that has a saved entry. Worker goroutines are started
 // immediately so the sessions are ready when the first message arrives.
+//
+// For each channel, the mapping is checked to get the per-project AllowedPaths and
+// SafetyPrompt. Falls back to saved.WorkingDir if no mapping exists.
 func (b *Bot) restoreSessions(ctx context.Context) error {
 	history, err := b.persist.Load()
 	if err != nil {
@@ -185,11 +200,23 @@ func (b *Bot) restoreSessions(ctx context.Context) error {
 		sess := b.store.GetOrCreate(channelID, saved.WorkingDir)
 		sess.SetSessionID(saved.SessionID)
 
-		// Start the worker goroutine.
+		// Determine per-project AllowedPaths: prefer mapping, fall back to saved.WorkingDir.
+		allowedPaths := b.cfg.AllowedPaths
+		safetyPrompt := b.cfg.SafetyPrompt
+		if mapping, ok := b.mappings.Get(channelID); ok {
+			allowedPaths = []string{mapping.Path}
+			safetyPrompt = config.BuildSafetyPrompt([]string{mapping.Path})
+		} else if saved.WorkingDir != "" {
+			allowedPaths = []string{saved.WorkingDir}
+			safetyPrompt = config.BuildSafetyPrompt([]string{saved.WorkingDir})
+		}
+
+		// Start the worker goroutine exactly once, tracking with workerStarted.
+		sess.SetWorkerStarted()
 		b.wg.Add(1)
 		wCfg := session.WorkerConfig{
-			AllowedPaths: b.cfg.AllowedPaths,
-			SafetyPrompt: b.cfg.SafetyPrompt,
+			AllowedPaths: allowedPaths,
+			SafetyPrompt: safetyPrompt,
 			FilteredEnv:  config.FilteredEnv(),
 		}
 		go func(s *session.Session, c session.WorkerConfig) {

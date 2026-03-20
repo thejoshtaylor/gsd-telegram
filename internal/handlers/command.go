@@ -6,6 +6,8 @@ package handlers
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -13,12 +15,14 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 
 	"github.com/user/gsd-tele-go/internal/config"
+	"github.com/user/gsd-tele-go/internal/project"
+	"github.com/user/gsd-tele-go/internal/security"
 	"github.com/user/gsd-tele-go/internal/session"
 )
 
 // HandleStart handles the /start command (CMD-01).
 // Shows bot welcome, version, current project path, and list of commands.
-func HandleStart(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, cfg *config.Config) error {
+func HandleStart(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, cfg *config.Config, mappings *project.MappingStore) error {
 	chatID := ctx.EffectiveChat.Id
 
 	// Get session state for status display.
@@ -34,12 +38,15 @@ func HandleStart(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, 
 	}
 
 	project := cfg.WorkingDir
+	if m, ok := mappings.Get(chatID); ok {
+		project = m.Path
+	}
 	if project == "" {
 		project = "Not linked"
 	}
 
 	text := fmt.Sprintf(
-		"GSD Telegram Bot v1.0\n\nProject: %s\nStatus: %s\n\nCommands:\n/new — Start a new Claude session\n/stop — Stop the current query\n/status — Show session info\n/resume — Restore a previous session",
+		"GSD Telegram Bot v1.0\n\nProject: %s\nStatus: %s\n\nCommands:\n/new — Start a new Claude session\n/stop — Stop the current query\n/status — Show session info\n/resume — Restore a previous session\n/project — Show or change current project",
 		project,
 		stateStr,
 	)
@@ -52,9 +59,20 @@ func HandleStart(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, 
 // Creates a fresh Claude session for the channel. If a session is running,
 // it is stopped first. The previous session ID is cleared so the next query
 // starts a new Claude session.
-func HandleNew(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, persist *session.PersistenceManager, cfg *config.Config) error {
+func HandleNew(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, persist *session.PersistenceManager, cfg *config.Config, mappings *project.MappingStore) error {
 	chatID := ctx.EffectiveChat.Id
-	sess := store.GetOrCreate(chatID, cfg.WorkingDir)
+
+	// Use the project mapping path if available, else fall back to cfg.WorkingDir.
+	workingDir := cfg.WorkingDir
+	if m, ok := mappings.Get(chatID); ok {
+		workingDir = m.Path
+	}
+	if workingDir == "" {
+		_, err := b.SendMessage(chatID, "No project linked. Use /project to link one.", nil)
+		return err
+	}
+
+	sess := store.GetOrCreate(chatID, workingDir)
 
 	if sess.IsRunning() {
 		sess.Stop()
@@ -89,16 +107,21 @@ func HandleStop(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore) e
 
 // HandleStatus handles the /status command (CMD-04).
 // Displays a status dashboard: session state, query state, token usage, context percent, project path.
-func HandleStatus(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, cfg *config.Config) error {
+func HandleStatus(b *gotgbot.Bot, ctx *ext.Context, store *session.SessionStore, cfg *config.Config, mappings *project.MappingStore) error {
 	chatID := ctx.EffectiveChat.Id
+
+	// Resolve project path from mapping or config fallback.
+	workingDir := cfg.WorkingDir
+	if m, ok := mappings.Get(chatID); ok {
+		workingDir = m.Path
+	}
 
 	sess, ok := store.Get(chatID)
 	var text string
 	if !ok {
-		// No session ever created for this channel.
-		text = buildStatusText(nil, cfg.WorkingDir)
+		text = buildStatusText(nil, workingDir)
 	} else {
-		text = buildStatusText(sess, cfg.WorkingDir)
+		text = buildStatusText(sess, workingDir)
 	}
 
 	_, err := b.SendMessage(chatID, text, nil)
@@ -176,27 +199,46 @@ func buildStatusText(sess *session.Session, workingDir string) string {
 
 	// --- Project path ---
 	sb.WriteString("\n")
-	project := workingDir
-	if project == "" {
-		project = "Not linked"
+	proj := workingDir
+	if proj == "" {
+		proj = "Not linked"
 	}
-	sb.WriteString(fmt.Sprintf("Project: %s", project))
+	sb.WriteString(fmt.Sprintf("Project: %s", proj))
 
 	return sb.String()
 }
 
 // HandleResume handles the /resume command (CMD-05).
-// Lists saved sessions as an inline keyboard. Tapping a button restores that session.
-func HandleResume(b *gotgbot.Bot, ctx *ext.Context, persist *session.PersistenceManager) error {
+// Lists saved sessions as an inline keyboard. Filters to only sessions matching
+// the current project's path (per-project session isolation).
+func HandleResume(b *gotgbot.Bot, ctx *ext.Context, persist *session.PersistenceManager, mappings *project.MappingStore) error {
 	chatID := ctx.EffectiveChat.Id
+
+	// Look up current project mapping to filter sessions.
+	mapping, hasMapped := mappings.Get(chatID)
 
 	sessions, err := persist.LoadForChannel(chatID)
 	if err != nil {
 		return fmt.Errorf("loading saved sessions: %w", err)
 	}
 
+	// Filter to only sessions matching current project's WorkingDir.
+	if hasMapped {
+		var filtered []session.SavedSession
+		for _, s := range sessions {
+			if s.WorkingDir == mapping.Path {
+				filtered = append(filtered, s)
+			}
+		}
+		sessions = filtered
+	}
+
 	if len(sessions) == 0 {
-		_, err := b.SendMessage(chatID, "No saved sessions found.", nil)
+		msg := "No saved sessions found."
+		if hasMapped {
+			msg = fmt.Sprintf("No saved sessions for project %s.", mapping.Name)
+		}
+		_, err := b.SendMessage(chatID, msg, nil)
 		return err
 	}
 
@@ -218,6 +260,60 @@ func HandleResume(b *gotgbot.Bot, ctx *ext.Context, persist *session.Persistence
 	_, err = b.SendMessage(chatID, "Select a session to resume:", &gotgbot.SendMessageOpts{
 		ReplyMarkup: keyboard,
 	})
+	return err
+}
+
+// HandleProject handles the /project command.
+// With no argument: shows current mapping with Change/Unlink buttons.
+// With path argument: directly reassigns the project.
+func HandleProject(b *gotgbot.Bot, ctx *ext.Context, mappings *project.MappingStore, awaitingPath *AwaitingPathState, cfg *config.Config) error {
+	chatID := ctx.EffectiveChat.Id
+	text := ctx.EffectiveMessage.Text
+
+	// Check for direct path argument: "/project /path/to/dir"
+	arg := strings.TrimSpace(strings.TrimPrefix(text, "/project"))
+	if arg != "" {
+		// Direct reassignment.
+		if !security.ValidatePath(arg, cfg.AllowedPaths) {
+			_, err := b.SendMessage(chatID, "Path not allowed. Must be under: "+strings.Join(cfg.AllowedPaths, ", "), nil)
+			return err
+		}
+		info, statErr := os.Stat(arg)
+		if statErr != nil || !info.IsDir() {
+			_, err := b.SendMessage(chatID, "Directory not found: "+arg, nil)
+			return err
+		}
+		m := project.ProjectMapping{
+			Path:     arg,
+			Name:     filepath.Base(arg),
+			LinkedAt: time.Now().UTC().Format(time.RFC3339),
+		}
+		if err := mappings.Set(chatID, m); err != nil {
+			_, _ = b.SendMessage(chatID, "Failed to save: "+err.Error(), nil)
+			return err
+		}
+		_, err := b.SendMessage(chatID, "Project reassigned to: "+arg, nil)
+		return err
+	}
+
+	// No argument — show current mapping with Change/Unlink buttons.
+	mapping, ok := mappings.Get(chatID)
+	if !ok {
+		awaitingPath.Set(chatID)
+		_, err := b.SendMessage(chatID, "No project linked. Reply with a directory path:", nil)
+		return err
+	}
+
+	keyboard := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{Text: "Change", CallbackData: "project:change"},
+				{Text: "Unlink", CallbackData: "project:unlink"},
+			},
+		},
+	}
+	msgText := fmt.Sprintf("Current project: %s\nPath: %s\nLinked: %s", mapping.Name, mapping.Path, mapping.LinkedAt)
+	_, err := b.SendMessage(chatID, msgText, &gotgbot.SendMessageOpts{ReplyMarkup: keyboard})
 	return err
 }
 

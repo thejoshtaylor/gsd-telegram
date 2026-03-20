@@ -40,6 +40,7 @@ func (b *Bot) registerHandlers(dispatcher *ext.Dispatcher) {
 	dispatcher.AddHandler(handlers.NewCommand("stop", b.handleStop))
 	dispatcher.AddHandler(handlers.NewCommand("status", b.handleStatus))
 	dispatcher.AddHandler(handlers.NewCommand("resume", b.handleResume))
+	dispatcher.AddHandler(handlers.NewCommand("project", b.handleProject))
 
 	// --- Callback query handler ---
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, b.handleCallback))
@@ -47,15 +48,15 @@ func (b *Bot) registerHandlers(dispatcher *ext.Dispatcher) {
 
 // handleText is the bot-layer wrapper that calls the handlers.HandleText function.
 func (b *Bot) handleText(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleText(tgBot, ctx, b.store, b.cfg, b.auditLog, b.persist, b.WaitGroup())
+	return bothandlers.HandleText(tgBot, ctx, b.store, b.cfg, b.auditLog, b.persist, b.WaitGroup(), b.mappings, b.awaitingPath)
 }
 
 func (b *Bot) handleStart(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleStart(tgBot, ctx, b.store, b.cfg)
+	return bothandlers.HandleStart(tgBot, ctx, b.store, b.cfg, b.mappings)
 }
 
 func (b *Bot) handleNew(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleNew(tgBot, ctx, b.store, b.persist, b.cfg)
+	return bothandlers.HandleNew(tgBot, ctx, b.store, b.persist, b.cfg, b.mappings)
 }
 
 func (b *Bot) handleStop(tgBot *gotgbot.Bot, ctx *ext.Context) error {
@@ -63,11 +64,15 @@ func (b *Bot) handleStop(tgBot *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (b *Bot) handleStatus(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleStatus(tgBot, ctx, b.store, b.cfg)
+	return bothandlers.HandleStatus(tgBot, ctx, b.store, b.cfg, b.mappings)
 }
 
 func (b *Bot) handleResume(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleResume(tgBot, ctx, b.persist)
+	return bothandlers.HandleResume(tgBot, ctx, b.persist, b.mappings)
+}
+
+func (b *Bot) handleProject(tgBot *gotgbot.Bot, ctx *ext.Context) error {
+	return bothandlers.HandleProject(tgBot, ctx, b.mappings, b.awaitingPath, b.cfg)
 }
 
 func (b *Bot) handleCallback(tgBot *gotgbot.Bot, ctx *ext.Context) error {

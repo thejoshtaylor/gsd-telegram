@@ -173,7 +173,7 @@ func TestFilteredEnvPreservesOthers(t *testing.T) {
 // TestBuildSafetyPrompt verifies the safety prompt contains expected content.
 func TestBuildSafetyPrompt(t *testing.T) {
 	paths := []string{"/path/a", "/path/b"}
-	prompt := buildSafetyPrompt(paths)
+	prompt := BuildSafetyPrompt(paths)
 
 	if !strings.Contains(prompt, "/path/a") {
 		t.Error("safety prompt should contain /path/a")
