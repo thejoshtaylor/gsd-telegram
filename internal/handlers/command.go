@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -315,6 +316,68 @@ func HandleProject(b *gotgbot.Bot, ctx *ext.Context, mappings *project.MappingSt
 	msgText := fmt.Sprintf("Current project: %s\nPath: %s\nLinked: %s", mapping.Name, mapping.Path, mapping.LinkedAt)
 	_, err := b.SendMessage(chatID, msgText, &gotgbot.SendMessageOpts{ReplyMarkup: keyboard})
 	return err
+}
+
+// HandleGsd handles the /gsd command.
+// With a direct command (e.g. "/gsd:execute-phase 2"), routes to the session.
+// Without an argument, shows the GSD keyboard with project status header.
+func HandleGsd(b *gotgbot.Bot, ctx *ext.Context, mappings *project.MappingStore, store *session.SessionStore, cfg *config.Config, wg *sync.WaitGroup) error {
+	_ = wg // wg is accepted for API consistency; callbacks manage their own goroutines
+	chatID := ctx.EffectiveChat.Id
+	text := ctx.EffectiveMessage.Text
+
+	// Check for direct command: "/gsd:execute-phase 2"
+	if strings.Contains(text, ":") {
+		directCmd := strings.TrimSpace(text)
+		if !strings.HasPrefix(directCmd, "/") {
+			directCmd = "/" + directCmd
+		}
+		return enqueueGsdCommand(b, chatID, directCmd, store, mappings, cfg)
+	}
+
+	// Show GSD keyboard.
+	mapping, ok := mappings.Get(chatID)
+	if !ok {
+		_, err := b.SendMessage(chatID, "No project linked. Use /project to link one first.", nil)
+		return err
+	}
+
+	statusHeader := buildGsdStatusHeader(mapping.Path)
+	keyboard := BuildGsdKeyboard(statusHeader)
+
+	_, err := b.SendMessage(chatID, statusHeader, &gotgbot.SendMessageOpts{
+		ReplyMarkup: keyboard,
+	})
+	return err
+}
+
+// buildGsdStatusHeader builds the status header text for the /gsd keyboard.
+// Format: "<project_name>\n<done>/<total> phases complete\n\nNext: Phase <N>: <Name>"
+func buildGsdStatusHeader(projectPath string) string {
+	phases := ParseRoadmap(projectPath)
+	if len(phases) == 0 {
+		return filepath.Base(projectPath) + "\nNo ROADMAP.md found"
+	}
+	done := 0
+	total := 0
+	var next *RoadmapPhase
+	for i := range phases {
+		if phases[i].Status == "skipped" {
+			continue
+		}
+		total++
+		if phases[i].Status == "done" {
+			done++
+		}
+		if phases[i].Status == "pending" && next == nil {
+			next = &phases[i]
+		}
+	}
+	header := fmt.Sprintf("%s\n%d/%d phases complete", filepath.Base(projectPath), done, total)
+	if next != nil {
+		header += fmt.Sprintf("\n\nNext: Phase %s: %s", next.Number, next.Name)
+	}
+	return header
 }
 
 // formatSessionLabel builds the display label for a session button.

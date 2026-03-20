@@ -12,6 +12,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/time/rate"
 
 	"github.com/user/gsd-tele-go/internal/audit"
 	"github.com/user/gsd-tele-go/internal/claude"
@@ -72,6 +73,7 @@ func HandleText(
 	wg *sync.WaitGroup,
 	mappings *project.MappingStore,
 	awaitingPath *AwaitingPathState,
+	globalLimiter *rate.Limiter,
 ) error {
 	if ctx.EffectiveMessage == nil {
 		return nil
@@ -186,7 +188,7 @@ func HandleText(
 	}
 
 	// --- Create streaming state and callback ---
-	ss := NewStreamingState(tgBot, chatID)
+	ss := NewStreamingState(tgBot, chatID, globalLimiter)
 
 	// Start typing indicator.
 	typingCtl := StartTypingIndicator(tgBot, chatID)
@@ -216,6 +218,11 @@ func HandleText(
 	go func() {
 		err, ok := <-qMsg.ErrCh
 		if !ok || err == nil {
+			// Success — check for response buttons.
+			fullText := ss.AccumulatedText()
+			if fullText != "" {
+				maybeAttachActionKeyboard(tgBot, chatID, fullText)
+			}
 			return
 		}
 
@@ -252,6 +259,25 @@ func HandleText(
 	}()
 
 	return nil
+}
+
+// maybeAttachActionKeyboard checks the response text for GSD commands, numbered
+// options, or lettered options. If any are found, sends a follow-up message with
+// the appropriate inline keyboard so the user can tap to respond.
+func maybeAttachActionKeyboard(tgBot *gotgbot.Bot, chatID int64, responseText string) {
+	gsdCmds := ExtractGsdCommands(responseText)
+	numbered := ExtractNumberedOptions(responseText)
+	lettered := ExtractLetteredOptions(responseText)
+
+	if len(gsdCmds) == 0 && len(numbered) == 0 && len(lettered) == 0 {
+		return
+	}
+
+	keyboard := BuildResponseKeyboard(gsdCmds, numbered, lettered)
+	_, _ = tgBot.SendMessage(chatID, "\u2014", &gotgbot.SendMessageOpts{
+		ReplyMarkup:         keyboard,
+		DisableNotification: true,
+	})
 }
 
 // handlePathInput handles a text message from a channel that is awaiting a project

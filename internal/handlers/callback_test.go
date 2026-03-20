@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -157,6 +158,264 @@ func TestCallbackParseAllActions(t *testing.T) {
 			t.Errorf("data=%q: expected action %d, got %d", tc.data, tc.expected, action)
 		}
 	}
+}
+
+// --- New callback prefix tests ---
+
+// TestParseCallbackGsd verifies that "gsd:{key}" routes to callbackActionGsd.
+func TestParseCallbackGsd(t *testing.T) {
+	action, payload := parseCallbackData("gsd:execute")
+	if action != callbackActionGsd {
+		t.Errorf("expected callbackActionGsd, got %d", action)
+	}
+	if payload != "execute" {
+		t.Errorf("expected payload %q, got %q", "execute", payload)
+	}
+}
+
+// TestParseCallbackGsdRun verifies that "gsd-run:{cmd}" routes to callbackActionGsdRun.
+func TestParseCallbackGsdRun(t *testing.T) {
+	data := "gsd-run:/gsd:next"
+	action, payload := parseCallbackData(data)
+	if action != callbackActionGsdRun {
+		t.Errorf("expected callbackActionGsdRun, got %d", action)
+	}
+	if payload != "/gsd:next" {
+		t.Errorf("expected payload %q, got %q", "/gsd:next", payload)
+	}
+}
+
+// TestParseCallbackGsdFresh verifies that "gsd-fresh:{cmd}" routes to callbackActionGsdFresh.
+func TestParseCallbackGsdFresh(t *testing.T) {
+	data := "gsd-fresh:/gsd:plan-phase 2"
+	action, payload := parseCallbackData(data)
+	if action != callbackActionGsdFresh {
+		t.Errorf("expected callbackActionGsdFresh, got %d", action)
+	}
+	if payload != "/gsd:plan-phase 2" {
+		t.Errorf("expected payload %q, got %q", "/gsd:plan-phase 2", payload)
+	}
+}
+
+// TestParseCallbackGsdPhase verifies that "gsd-exec:{N}" routes to callbackActionGsdPhase.
+func TestParseCallbackGsdPhase(t *testing.T) {
+	cases := []string{
+		"gsd-exec:2",
+		"gsd-plan:1",
+		"gsd-discuss:3",
+		"gsd-research:2",
+		"gsd-verify:1",
+		"gsd-remove:4",
+	}
+	for _, data := range cases {
+		action, payload := parseCallbackData(data)
+		if action != callbackActionGsdPhase {
+			t.Errorf("data=%q: expected callbackActionGsdPhase, got %d", data, action)
+		}
+		if payload != data {
+			t.Errorf("data=%q: expected full data as payload, got %q", data, payload)
+		}
+	}
+}
+
+// TestParseCallbackOption verifies that "option:{key}" routes to callbackActionOption.
+func TestParseCallbackOption(t *testing.T) {
+	action, payload := parseCallbackData("option:1")
+	if action != callbackActionOption {
+		t.Errorf("expected callbackActionOption, got %d", action)
+	}
+	if payload != "1" {
+		t.Errorf("expected payload %q, got %q", "1", payload)
+	}
+}
+
+// TestParseCallbackOption_Letter verifies that "option:A" routes to callbackActionOption.
+func TestParseCallbackOption_Letter(t *testing.T) {
+	action, payload := parseCallbackData("option:A")
+	if action != callbackActionOption {
+		t.Errorf("expected callbackActionOption, got %d", action)
+	}
+	if payload != "A" {
+		t.Errorf("expected payload %q, got %q", "A", payload)
+	}
+}
+
+// TestParseCallbackAskUser verifies that "askuser:{id}:{idx}" routes to callbackActionAskUser.
+func TestParseCallbackAskUser(t *testing.T) {
+	data := "askuser:a1b2c3d4:0"
+	action, payload := parseCallbackData(data)
+	if action != callbackActionAskUser {
+		t.Errorf("expected callbackActionAskUser, got %d", action)
+	}
+	if payload != "a1b2c3d4:0" {
+		t.Errorf("expected payload %q, got %q", "a1b2c3d4:0", payload)
+	}
+}
+
+// TestParseCallbackProjectChange verifies that "project:change" routes to callbackActionProjectChange.
+func TestParseCallbackProjectChange(t *testing.T) {
+	action, payload := parseCallbackData("project:change")
+	if action != callbackActionProjectChange {
+		t.Errorf("expected callbackActionProjectChange, got %d", action)
+	}
+	if payload != "" {
+		t.Errorf("expected empty payload, got %q", payload)
+	}
+}
+
+// TestParseCallbackProjectUnlink verifies that "project:unlink" routes to callbackActionProjectUnlink.
+func TestParseCallbackProjectUnlink(t *testing.T) {
+	action, payload := parseCallbackData("project:unlink")
+	if action != callbackActionProjectUnlink {
+		t.Errorf("expected callbackActionProjectUnlink, got %d", action)
+	}
+	if payload != "" {
+		t.Errorf("expected empty payload, got %q", payload)
+	}
+}
+
+// TestParseCallbackPrefixOrder verifies that "gsd-run:..." is NOT parsed as "gsd:" action.
+// The sub-prefix "gsd-run:" must be checked before "gsd:" to prevent premature matching.
+func TestParseCallbackPrefixOrder(t *testing.T) {
+	// gsd-run: must not be caught by gsd: prefix
+	action, _ := parseCallbackData("gsd-run:/gsd:execute-phase 2")
+	if action == callbackActionGsd {
+		t.Error("gsd-run: was incorrectly parsed as callbackActionGsd (prefix order bug)")
+	}
+	if action != callbackActionGsdRun {
+		t.Errorf("expected callbackActionGsdRun, got %d", action)
+	}
+
+	// gsd-fresh: must not be caught by gsd: prefix
+	action2, _ := parseCallbackData("gsd-fresh:/gsd:plan-phase 1")
+	if action2 == callbackActionGsd {
+		t.Error("gsd-fresh: was incorrectly parsed as callbackActionGsd (prefix order bug)")
+	}
+	if action2 != callbackActionGsdFresh {
+		t.Errorf("expected callbackActionGsdFresh, got %d", action2)
+	}
+
+	// gsd-exec: must not be caught by gsd: prefix
+	action3, _ := parseCallbackData("gsd-exec:3")
+	if action3 == callbackActionGsd {
+		t.Error("gsd-exec: was incorrectly parsed as callbackActionGsd (prefix order bug)")
+	}
+	if action3 != callbackActionGsdPhase {
+		t.Errorf("expected callbackActionGsdPhase, got %d", action3)
+	}
+}
+
+// TestAskUserCallbackTempFile tests the core askuser temp-file read/parse/delete flow
+// without requiring a full bot context.
+func TestAskUserCallbackTempFile(t *testing.T) {
+	requestID := "testid123"
+	tmpFile := filepath.Join(os.TempDir(), "ask-user-"+requestID+".json")
+
+	// Create the temp JSON file.
+	req := askUserRequest{
+		Question: "Pick one",
+		Options:  []string{"A", "B", "C"},
+		Status:   "pending",
+	}
+	data, err := json.Marshal(req)
+	if err != nil {
+		t.Fatalf("failed to marshal askUserRequest: %v", err)
+	}
+	if err := os.WriteFile(tmpFile, data, 0600); err != nil {
+		t.Fatalf("failed to write temp file: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Remove(tmpFile) })
+
+	// Read and parse the file (simulating the callback handler logic).
+	readData, err := os.ReadFile(tmpFile)
+	if err != nil {
+		t.Fatalf("failed to read temp file: %v", err)
+	}
+
+	var parsed askUserRequest
+	if err := json.Unmarshal(readData, &parsed); err != nil {
+		t.Fatalf("failed to parse askUserRequest: %v", err)
+	}
+
+	// Validate question and options.
+	if parsed.Question != "Pick one" {
+		t.Errorf("expected question %q, got %q", "Pick one", parsed.Question)
+	}
+	if len(parsed.Options) != 3 {
+		t.Fatalf("expected 3 options, got %d", len(parsed.Options))
+	}
+
+	// Validate that option index 1 maps to "B".
+	optionIndex := 1
+	if parsed.Options[optionIndex] != "B" {
+		t.Errorf("expected option[1]=%q, got %q", "B", parsed.Options[optionIndex])
+	}
+
+	// Delete the temp file and verify it's gone.
+	if err := os.Remove(tmpFile); err != nil {
+		t.Fatalf("failed to delete temp file: %v", err)
+	}
+	if _, err := os.Stat(tmpFile); !os.IsNotExist(err) {
+		t.Error("expected temp file to be deleted, but it still exists")
+	}
+}
+
+// TestBuildGsdStatusHeader_WithPhases tests the GSD status header builder with
+// a temp directory containing a .planning/ROADMAP.md with three phases.
+func TestBuildGsdStatusHeader_WithPhases(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create .planning/ROADMAP.md with three phases.
+	planningDir := filepath.Join(dir, ".planning")
+	if err := os.MkdirAll(planningDir, 0755); err != nil {
+		t.Fatalf("failed to create .planning dir: %v", err)
+	}
+
+	roadmapContent := `# Roadmap
+
+## Phases
+
+- [x] **Phase 1: Core** - Core infrastructure
+- [ ] **Phase 2: Features** - Main feature set
+- [~] **Phase 3: Polish** - Polish and cleanup
+`
+	if err := os.WriteFile(filepath.Join(planningDir, "ROADMAP.md"), []byte(roadmapContent), 0644); err != nil {
+		t.Fatalf("failed to write ROADMAP.md: %v", err)
+	}
+
+	header := buildGsdStatusHeader(dir)
+
+	// (a) output contains "1/2 phases complete" (skipped phase not counted in total)
+	if !contains(header, "1/2 phases complete") {
+		t.Errorf("expected %q in header, got: %q", "1/2 phases complete", header)
+	}
+
+	// (b) output contains "Next: Phase 2: Features"
+	if !contains(header, "Next: Phase 2:") {
+		t.Errorf("expected %q in header, got: %q", "Next: Phase 2:", header)
+	}
+	if !contains(header, "Features") {
+		t.Errorf("expected %q in header, got: %q", "Features", header)
+	}
+
+	// (c) output contains filepath.Base(dir) as project name
+	projectName := filepath.Base(dir)
+	if !contains(header, projectName) {
+		t.Errorf("expected project name %q in header, got: %q", projectName, header)
+	}
+}
+
+// contains is a simple substring helper for test assertions.
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || len(substr) == 0 ||
+		func() bool {
+			for i := 0; i <= len(s)-len(substr); i++ {
+				if s[i:i+len(substr)] == substr {
+					return true
+				}
+			}
+			return false
+		}())
 }
 
 // Compile-time check: os package used for tmpdir cleanup.
