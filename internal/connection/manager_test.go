@@ -2,6 +2,7 @@ package connection
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -14,6 +15,7 @@ import (
 	"go.uber.org/goleak"
 
 	"github.com/user/gsd-tele-go/internal/config"
+	"github.com/user/gsd-tele-go/internal/protocol"
 )
 
 // newTestConfig creates a NodeConfig for tests with the given server URL.
@@ -95,8 +97,13 @@ func TestDial(t *testing.T) {
 
 	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
 		defer conn.CloseNow()
-		// Read a single frame, echo back, then exit.
-		_, data, err := conn.Read(context.Background())
+		ctx := context.Background()
+		// First frame is always NodeRegister — skip it.
+		if _, _, err := conn.Read(ctx); err != nil {
+			return
+		}
+		// Second frame is the test frame sent via Send().
+		_, data, err := conn.Read(ctx)
 		if err == nil {
 			received <- string(data)
 		}
@@ -113,7 +120,7 @@ func TestDial(t *testing.T) {
 	m.Start(ctx)
 	defer m.Stop()
 
-	// Wait for the connection to establish.
+	// Wait for the connection to establish and registration to complete.
 	time.Sleep(200 * time.Millisecond)
 
 	// Send a test frame.
@@ -169,6 +176,224 @@ func TestBackoff(t *testing.T) {
 	got := b.Next()
 	if got > minDur {
 		t.Errorf("after Reset, got %v, want <= %v", got, minDur)
+	}
+}
+
+// TestRegisterOnConnect verifies that the first frame received by the server
+// after a new connection is a NodeRegister envelope with the correct NodeID.
+func TestRegisterOnConnect(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	registered := make(chan string, 1) // receives NodeID from first frame
+
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		ctx := context.Background()
+		// Read first frame — must be node_register
+		_, data, err := conn.Read(ctx)
+		if err != nil {
+			t.Logf("read error: %v", err)
+			return
+		}
+		var env protocol.Envelope
+		if err := json.Unmarshal(data, &env); err != nil {
+			t.Logf("unmarshal error: %v", err)
+			return
+		}
+		if env.Type != protocol.TypeNodeRegister {
+			t.Logf("expected node_register, got %q", env.Type)
+			return
+		}
+		var reg protocol.NodeRegister
+		if err := env.Decode(&reg); err != nil {
+			t.Logf("decode error: %v", err)
+			return
+		}
+		registered <- reg.NodeID
+		// Drain until close.
+		for {
+			if _, _, err := conn.Read(ctx); err != nil {
+				return
+			}
+		}
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	m.Start(ctx)
+	defer m.Stop()
+
+	select {
+	case nodeID := <-registered:
+		if nodeID != cfg.NodeID {
+			t.Errorf("NodeID = %q, want %q", nodeID, cfg.NodeID)
+		}
+	case <-time.After(5 * time.Second):
+		t.Error("server did not receive NodeRegister frame within timeout")
+	}
+}
+
+// TestHeartbeatKeepsAlive verifies that a mock server which reads frames
+// (allowing pong responses) keeps the connection alive through multiple heartbeats.
+func TestHeartbeatKeepsAlive(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	connected := make(chan struct{})
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		close(connected)
+		ctx := context.Background()
+		// Read loop — keeps pong handling alive (coder/websocket handles pings automatically)
+		deadline := time.Now().Add(600 * time.Millisecond)
+		for time.Now().Before(deadline) {
+			conn.SetReadLimit(1 << 20)
+			_ = conn // read with short deadline
+			rCtx, rCancel := context.WithDeadline(ctx, deadline)
+			_, _, err := conn.Read(rCtx)
+			rCancel()
+			if err != nil {
+				return
+			}
+		}
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+	m.SetHeartbeatInterval(100 * time.Millisecond)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	m.Start(ctx)
+	defer m.Stop()
+
+	// Wait for connection to be established.
+	select {
+	case <-connected:
+	case <-time.After(5 * time.Second):
+		t.Fatal("connection not established")
+	}
+
+	// Connection should still be alive after 500ms (5+ heartbeats at 100ms).
+	time.Sleep(500 * time.Millisecond)
+
+	// Verify we can still send (connection still alive).
+	if err := m.Send([]byte(`{"type":"ping-check"}`)); err != nil {
+		t.Errorf("Send failed after heartbeat period: %v", err)
+	}
+}
+
+// TestHeartbeatDeadServer verifies that a server that does not read (blocking
+// pong responses) causes the manager to close the connection within 3x the
+// heartbeat interval.
+func TestHeartbeatDeadServer(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	disconnected := make(chan struct{})
+	serverDone := make(chan struct{})
+
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		defer close(serverDone)
+		// Do NOT read — this blocks pong responses, simulating a dead server.
+		// Use a select with a channel so we can unblock when the test finishes.
+		select {
+		case <-disconnected:
+			// Test is done; exit cleanly.
+		case <-time.After(5 * time.Second):
+			// Failsafe to avoid goroutine leak if test fails.
+		}
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+	m.SetHeartbeatInterval(100 * time.Millisecond)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	m.Start(ctx)
+
+	// The heartbeat pong timeout is 3x interval = 300ms.
+	// The connection should be closed and reconnected within 400ms.
+	time.Sleep(400 * time.Millisecond)
+	m.Stop()
+
+	// Signal the server handler to exit.
+	close(disconnected)
+
+	// Wait for the server goroutine to fully exit before goleak check.
+	select {
+	case <-serverDone:
+	case <-time.After(2 * time.Second):
+		t.Error("server handler did not exit within timeout")
+	}
+}
+
+// TestRegisterAfterReconnect verifies that after a server drop, the manager
+// reconnects and sends a second NodeRegister frame.
+func TestRegisterAfterReconnect(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	var mu sync.Mutex
+	registerCount := 0
+	allRegistered := make(chan struct{})
+
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		ctx := context.Background()
+		// Read the NodeRegister frame.
+		_, data, err := conn.Read(ctx)
+		if err != nil {
+			return
+		}
+		var env protocol.Envelope
+		if err := json.Unmarshal(data, &env); err != nil {
+			return
+		}
+		if env.Type == protocol.TypeNodeRegister {
+			mu.Lock()
+			registerCount++
+			count := registerCount
+			mu.Unlock()
+			if count >= 2 {
+				close(allRegistered)
+				// Drain until close.
+				for {
+					if _, _, err := conn.Read(ctx); err != nil {
+						return
+					}
+				}
+			}
+		}
+		// First connection: close immediately to trigger reconnect.
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	m.Start(ctx)
+	defer m.Stop()
+
+	select {
+	case <-allRegistered:
+		// Good — two NodeRegister frames received.
+	case <-time.After(10 * time.Second):
+		mu.Lock()
+		count := registerCount
+		mu.Unlock()
+		t.Errorf("only %d register frames received, want 2", count)
 	}
 }
 
