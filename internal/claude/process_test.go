@@ -220,6 +220,144 @@ func TestStreamCapturesSessionID(t *testing.T) {
 	}
 }
 
+// TestStreamCapturesUsage verifies that p.LastUsage() returns the UsageData from a result event.
+func TestStreamCapturesUsage(t *testing.T) {
+	usage := UsageData{InputTokens: 100, OutputTokens: 50}
+	evt := ClaudeEvent{Type: "result", SessionID: "s1", Usage: &usage}
+	b, _ := json.Marshal(evt)
+
+	tmpFile, err := os.CreateTemp("", "usage-test-*.jsonl")
+	if err != nil {
+		t.Fatalf("CreateTemp: %v", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	tmpFile.Write(b)
+	tmpFile.WriteString("\n")
+	tmpFile.Close()
+
+	var bin string
+	var args []string
+	if runtime.GOOS == "windows" {
+		bin = "cmd.exe"
+		args = []string{"/c", "type", tmpFile.Name()}
+	} else {
+		bin = "cat"
+		args = []string{tmpFile.Name()}
+	}
+
+	ctx := context.Background()
+	env := os.Environ()
+
+	p, err := NewProcess(ctx, bin, ".", "", args, env)
+	if err != nil {
+		t.Fatalf("NewProcess: %v", err)
+	}
+
+	_ = p.Stream(ctx, func(ClaudeEvent) error { return nil })
+
+	if p.LastUsage() == nil {
+		t.Fatalf("LastUsage() = nil, want non-nil — stderr: %q", p.Stderr())
+	}
+	if p.LastUsage().InputTokens != 100 {
+		t.Errorf("LastUsage().InputTokens = %d, want 100", p.LastUsage().InputTokens)
+	}
+	if p.LastUsage().OutputTokens != 50 {
+		t.Errorf("LastUsage().OutputTokens = %d, want 50", p.LastUsage().OutputTokens)
+	}
+}
+
+// TestStreamCapturesContextPercent verifies that p.LastContextPercent() returns the computed
+// context percentage from a result event with ModelUsage populated.
+func TestStreamCapturesContextPercent(t *testing.T) {
+	entry := ModelUsageEntry{InputTokens: 8000, OutputTokens: 2000, ContextWindow: 200000}
+	raw, _ := json.Marshal(entry)
+	evt := ClaudeEvent{
+		Type:       "result",
+		ModelUsage: map[string]json.RawMessage{"claude-sonnet": raw},
+	}
+	b, _ := json.Marshal(evt)
+
+	tmpFile, err := os.CreateTemp("", "ctx-pct-test-*.jsonl")
+	if err != nil {
+		t.Fatalf("CreateTemp: %v", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	tmpFile.Write(b)
+	tmpFile.WriteString("\n")
+	tmpFile.Close()
+
+	var bin string
+	var args []string
+	if runtime.GOOS == "windows" {
+		bin = "cmd.exe"
+		args = []string{"/c", "type", tmpFile.Name()}
+	} else {
+		bin = "cat"
+		args = []string{tmpFile.Name()}
+	}
+
+	ctx := context.Background()
+	env := os.Environ()
+
+	p, err := NewProcess(ctx, bin, ".", "", args, env)
+	if err != nil {
+		t.Fatalf("NewProcess: %v", err)
+	}
+
+	_ = p.Stream(ctx, func(ClaudeEvent) error { return nil })
+
+	if p.LastContextPercent() == nil {
+		t.Fatalf("LastContextPercent() = nil, want non-nil — stderr: %q", p.Stderr())
+	}
+	// (8000 + 2000) * 100 / 200000 = 5
+	if *p.LastContextPercent() != 5 {
+		t.Errorf("LastContextPercent() = %d, want 5", *p.LastContextPercent())
+	}
+}
+
+// TestStreamNoUsageOnEmptyResult verifies that p.LastUsage() and p.LastContextPercent()
+// remain nil when a result event has no Usage and no ModelUsage.
+func TestStreamNoUsageOnEmptyResult(t *testing.T) {
+	evt := ClaudeEvent{Type: "result", SessionID: "s1", Result: "done"}
+	b, _ := json.Marshal(evt)
+
+	tmpFile, err := os.CreateTemp("", "no-usage-test-*.jsonl")
+	if err != nil {
+		t.Fatalf("CreateTemp: %v", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	tmpFile.Write(b)
+	tmpFile.WriteString("\n")
+	tmpFile.Close()
+
+	var bin string
+	var args []string
+	if runtime.GOOS == "windows" {
+		bin = "cmd.exe"
+		args = []string{"/c", "type", tmpFile.Name()}
+	} else {
+		bin = "cat"
+		args = []string{tmpFile.Name()}
+	}
+
+	ctx := context.Background()
+	env := os.Environ()
+
+	p, err := NewProcess(ctx, bin, ".", "", args, env)
+	if err != nil {
+		t.Fatalf("NewProcess: %v", err)
+	}
+
+	_ = p.Stream(ctx, func(ClaudeEvent) error { return nil })
+
+	if p.LastUsage() != nil {
+		t.Errorf("LastUsage() = %+v, want nil", p.LastUsage())
+	}
+	if p.LastContextPercent() != nil {
+		t.Errorf("LastContextPercent() = %d, want nil", *p.LastContextPercent())
+	}
+}
+
 // TestStreamDetectsContextLimit verifies that ContextLimitHit() returns true when
 // stderr contains a context limit error pattern.
 func TestStreamDetectsContextLimit(t *testing.T) {

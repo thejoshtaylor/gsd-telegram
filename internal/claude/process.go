@@ -25,12 +25,14 @@ type StatusCallback func(event ClaudeEvent) error
 // Process wraps an exec.Cmd running the Claude CLI and provides methods
 // for streaming its NDJSON output and killing the process tree.
 type Process struct {
-	cmd             *exec.Cmd
-	stdout          io.ReadCloser
-	stderr          io.ReadCloser
-	stderrBuf       strings.Builder
-	contextLimitHit bool
-	sessionID       string
+	cmd                *exec.Cmd
+	stdout             io.ReadCloser
+	stderr             io.ReadCloser
+	stderrBuf          strings.Builder
+	contextLimitHit    bool
+	sessionID          string
+	lastUsage          *UsageData
+	lastContextPercent *int
 }
 
 // NewProcess creates and starts a Claude CLI subprocess.
@@ -129,14 +131,20 @@ func (p *Process) Stream(ctx context.Context, cb StatusCallback) error {
 			continue
 		}
 
-		// Capture session ID from result events.
-		if event.Type == "result" && event.SessionID != "" {
-			p.sessionID = event.SessionID
-		}
-
-		// Check for context limit in result text.
-		if event.Type == "result" && isContextLimitError(event.Result) {
-			p.contextLimitHit = true
+		// Capture data from result events.
+		if event.Type == "result" {
+			if event.SessionID != "" {
+				p.sessionID = event.SessionID
+			}
+			if event.Usage != nil {
+				p.lastUsage = event.Usage
+			}
+			if pct := event.ContextPercent(); pct != nil {
+				p.lastContextPercent = pct
+			}
+			if isContextLimitError(event.Result) {
+				p.contextLimitHit = true
+			}
 		}
 
 		if err := cb(event); err != nil {
@@ -176,6 +184,18 @@ func (p *Process) Kill() error {
 // Returns empty string if no result event has been received yet.
 func (p *Process) SessionID() string {
 	return p.sessionID
+}
+
+// LastUsage returns the UsageData captured from the most recent result event.
+// Returns nil if no result event with usage data has been received.
+func (p *Process) LastUsage() *UsageData {
+	return p.lastUsage
+}
+
+// LastContextPercent returns the context window utilisation percentage captured
+// from the most recent result event. Returns nil if no ModelUsage data was present.
+func (p *Process) LastContextPercent() *int {
+	return p.lastContextPercent
 }
 
 // Stderr returns the accumulated stderr output.
