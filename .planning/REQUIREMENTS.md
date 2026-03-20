@@ -11,10 +11,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **CORE-01**: Bot connects to Telegram via long polling and receives messages from multiple channels
 - [x] **CORE-02**: Bot loads configuration from environment variables and/or config file
-- [x] **CORE-03**: Bot sends typing indicators while processing requests
+- [ ] **CORE-03**: Bot sends typing indicators while processing requests
 - [x] **CORE-04**: Bot reports errors back to the user with truncated error messages
 - [x] **CORE-05**: Bot rate-limits requests per channel using token bucket algorithm
-- [x] **CORE-06**: Bot writes append-only audit log (timestamp, user, channel, action, message excerpt)
+- [ ] **CORE-06**: Bot writes append-only audit log (timestamp, user, channel, action, message excerpt)
 
 ### Claude Session Management
 
@@ -23,8 +23,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SESS-03**: Bot displays tool execution status with emoji indicators during streaming
 - [x] **SESS-04**: User can send text messages that are routed to the channel's Claude session
 - [x] **SESS-05**: User can interrupt a running query by sending a message prefixed with `!`
-- [x] **SESS-06**: Bot shows context window usage as a progress bar in status messages
-- [x] **SESS-07**: Bot tracks and displays token usage (input/output/cache) in /status
+- [ ] **SESS-06**: Bot shows context window usage as a progress bar in status messages
+- [ ] **SESS-07**: Bot tracks and displays token usage (input/output/cache) in /status
 - [x] **SESS-08**: Bot properly kills Windows process trees (taskkill /T /F) when stopping sessions
 
 ### Multi-Project Management
@@ -39,7 +39,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **AUTH-01**: Bot authenticates users based on Telegram channel membership (per-channel auth)
 - [x] **AUTH-02**: Bot validates file paths against allowed directories before Claude access
-- [x] **AUTH-03**: Bot checks commands against blocked patterns for safety
+- [ ] **AUTH-03**: Bot checks commands against blocked patterns for safety
 
 ### Session Lifecycle Commands
 
@@ -51,7 +51,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Session Persistence
 
-- [x] **PERS-01**: Bot saves session state (session ID, working dir, conversation context) to JSON
+- [ ] **PERS-01**: Bot saves session state (session ID, working dir, conversation context) to JSON
 - [x] **PERS-02**: Bot restores sessions automatically on restart for all mapped channels
 - [x] **PERS-03**: Session state persists across bot crashes and service restarts
 
@@ -65,16 +65,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Media Handling
 
-- [x] **MEDIA-01**: User can send voice messages; bot transcribes via OpenAI Whisper and processes as text
-- [x] **MEDIA-02**: User can send photos; bot forwards to Claude for visual analysis
-- [x] **MEDIA-03**: Bot buffers photo albums (media groups) with a timeout before sending as a batch
-- [x] **MEDIA-04**: User can send PDF documents; bot extracts text via pdftotext and sends to Claude
-- [x] **MEDIA-05**: User can send text/code files as documents; bot reads content and sends to Claude
+- [ ] **MEDIA-01**: User can send voice messages; bot transcribes via OpenAI Whisper and processes as text
+- [ ] **MEDIA-02**: User can send photos; bot forwards to Claude for visual analysis
+- [ ] **MEDIA-03**: Bot buffers photo albums (media groups) with a timeout before sending as a batch
+- [ ] **MEDIA-04**: User can send PDF documents; bot extracts text via pdftotext and sends to Claude
+- [ ] **MEDIA-05**: User can send text/code files as documents; bot reads content and sends to Claude
 
 ### Deployment
 
 - [x] **DEPLOY-01**: Bot compiles to a single Go binary (.exe) for Windows
-- [x] **DEPLOY-02**: Bot installs as a Windows Service (runs at boot, no terminal window)
+- [ ] **DEPLOY-02**: Bot installs as a Windows Service (runs at boot, no terminal window)
 - [x] **DEPLOY-03**: Bot resolves external tool paths (claude, pdftotext) explicitly at startup, not via PATH lookup
 - [x] **DEPLOY-04**: Bot supports graceful shutdown — drains active sessions before stopping
 
@@ -117,17 +117,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | CORE-01 | Phase 1 | Complete |
 | CORE-02 | Phase 1 | Complete |
-| CORE-03 | Phase 1 | Complete |
+| CORE-03 | Phase 6 | Pending |
 | CORE-04 | Phase 1 | Complete |
 | CORE-05 | Phase 1 | Complete |
-| CORE-06 | Phase 1 | Complete |
+| CORE-06 | Phase 6 | Pending |
 | SESS-01 | Phase 1 | Complete |
 | SESS-02 | Phase 1 | Complete |
 | SESS-03 | Phase 1 | Complete |
 | SESS-04 | Phase 1 | Complete |
 | SESS-05 | Phase 1 | Complete |
-| SESS-06 | Phase 1 | Complete |
-| SESS-07 | Phase 1 | Complete |
+| SESS-06 | Phase 5 | Pending |
+| SESS-07 | Phase 5 | Pending |
 | SESS-08 | Phase 1 | Complete |
 | PROJ-01 | Phase 2 | Complete |
 | PROJ-02 | Phase 2 | Complete |
@@ -136,13 +136,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROJ-05 | Phase 2 | Complete |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
-| AUTH-03 | Phase 1 | Complete |
+| AUTH-03 | Phase 6 | Pending |
 | CMD-01 | Phase 1 | Complete |
 | CMD-02 | Phase 1 | Complete |
 | CMD-03 | Phase 1 | Complete |
 | CMD-04 | Phase 1 | Complete |
 | CMD-05 | Phase 1 | Complete |
-| PERS-01 | Phase 1 | Complete |
+| PERS-01 | Phase 5 | Pending |
 | PERS-02 | Phase 1 | Complete |
 | PERS-03 | Phase 1 | Complete |
 | GSD-01 | Phase 2 | Complete |
@@ -150,13 +150,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GSD-03 | Phase 2 | Complete |
 | GSD-04 | Phase 2 | Complete |
 | GSD-05 | Phase 2 | Complete |
-| MEDIA-01 | Phase 3 | Complete |
-| MEDIA-02 | Phase 3 | Complete |
-| MEDIA-03 | Phase 3 | Complete |
-| MEDIA-04 | Phase 3 | Complete |
-| MEDIA-05 | Phase 3 | Complete |
+| MEDIA-01 | Phase 7 | Pending |
+| MEDIA-02 | Phase 7 | Pending |
+| MEDIA-03 | Phase 7 | Pending |
+| MEDIA-04 | Phase 7 | Pending |
+| MEDIA-05 | Phase 7 | Pending |
 | DEPLOY-01 | Phase 1 | Complete |
-| DEPLOY-02 | Phase 3 | Complete |
+| DEPLOY-02 | Phase 7 | Pending |
 | DEPLOY-03 | Phase 1 | Complete |
 | DEPLOY-04 | Phase 1 | Complete |
 
@@ -167,4 +167,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after roadmap creation*
+*Last updated: 2026-03-19 after gap closure phase creation (Phases 5-7)*

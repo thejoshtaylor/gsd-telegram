@@ -14,6 +14,9 @@ Build a Go-native Telegram bot that controls Claude Code across multiple project
 - [x] **Phase 2: Multi-Project and GSD Integration** - Multiple independent Claude sessions across channels with full GSD workflow keyboard (completed 2026-03-20)
 - [ ] **Phase 3: Media Handlers and Windows Service** - Voice, photo, PDF processing and Windows Service deployment
 - [x] **Phase 4: Callback Handler Integration Fixes** - Fix WaitGroup tracking, wrong working directory, and missing rate limiter in callback handlers (completed 2026-03-20)
+- [ ] **Phase 5: Fix Session Metrics and GSD Persistence** - Capture token/context data into session fields and wire OnQueryComplete into GSD callback path
+- [ ] **Phase 6: Cross-Phase Safety Hardening** - Add typing indicators, audit logging, and command safety checks to all message paths
+- [ ] **Phase 7: Phase 3 Verification and Nyquist Compliance** - Formal verification of Phase 3, roadmap status update, Nyquist compliance
 
 ## Phase Details
 
@@ -87,6 +90,36 @@ Plans:
 Plans:
 - [ ] 04-01-PLAN.md — Thread bot WaitGroup, mapping lookup, and globalAPILimiter through callback handler chain
 
+### Phase 5: Fix Session Metrics and GSD Persistence
+**Goal**: Capture token usage and context percentage from Claude result events into session fields so /status displays real data, and wire OnQueryComplete into GSD callback path so keyboard-triggered sessions persist for /resume
+**Depends on**: Phase 4
+**Requirements**: SESS-06, SESS-07, PERS-01
+**Gap Closure:** Closes INT-01, INT-02, Flow "Token usage and context display" from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. After a query completes, /status shows non-zero input/output/cache token counts matching the last Claude response
+  2. After a query completes, /status shows a context window usage percentage that reflects actual usage
+  3. A GSD command triggered via inline keyboard button results in the session being persisted — it appears in /resume
+
+### Phase 6: Cross-Phase Safety Hardening
+**Goal**: Ensure typing indicators, audit logging, and command safety checks apply uniformly to all message paths — not just text handler
+**Depends on**: Phase 5
+**Requirements**: CORE-03, CORE-06, AUTH-03
+**Gap Closure:** Closes INT-03, INT-04, INT-05 from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. Callback-triggered Claude calls (GSD buttons, resume, new) send a typing indicator while processing
+  2. GSD/callback-triggered operations write entries to the audit log
+  3. Voice transcripts, photo captions, document content, and GSD callback commands are checked by CheckCommandSafety before reaching Claude
+
+### Phase 7: Phase 3 Verification and Nyquist Compliance
+**Goal**: Formally verify Phase 3 implementation (media handlers + Windows Service) that was executed but never verified, update Phase 3 roadmap status, and achieve Nyquist compliance for Phases 3 and 4
+**Depends on**: Phase 6
+**Requirements**: MEDIA-01, MEDIA-02, MEDIA-03, MEDIA-04, MEDIA-05, DEPLOY-02
+**Gap Closure:** Closes 6 orphaned requirements from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. 03-VERIFICATION.md exists with observable truths verified for all 6 requirements
+  2. Phase 3 roadmap status updated to Complete
+  3. Nyquist VALIDATION.md for Phases 3 and 4 shows nyquist_compliant: true
+
 ## Progress
 
 **Execution Order:**
@@ -98,3 +131,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | 2. Multi-Project and GSD Integration | 4/4 | Complete   | 2026-03-20 |
 | 3. Media Handlers and Windows Service | 1/4 | In Progress | - |
 | 4. Callback Handler Integration Fixes | 1/1 | Complete   | 2026-03-20 |
+| 5. Fix Session Metrics and GSD Persistence | 0/0 | Pending | - |
+| 6. Cross-Phase Safety Hardening | 0/0 | Pending | - |
+| 7. Phase 3 Verification and Nyquist Compliance | 0/0 | Pending | - |
