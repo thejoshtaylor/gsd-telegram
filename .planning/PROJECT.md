@@ -12,7 +12,14 @@ Control Claude Code remotely from Telegram across multiple projects simultaneous
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Claude CLI subprocess management with streaming output — Validated in Phase 1: Core Bot Infrastructure
+- [x] Session persistence and resume across restarts — Validated in Phase 1
+- [x] Rate limiting per channel — Validated in Phase 1
+- [x] Audit logging — Validated in Phase 1
+- [x] Streaming responses from Claude with live message updates — Validated in Phase 1
+- [x] Markdown-to-HTML conversion for Telegram's message format — Validated in Phase 1
+- [x] Tool status emoji formatting in responses — Validated in Phase 1
+- [x] Safety layers: rate limiting, path validation, command safety checks — Validated in Phase 1
 
 ### Active
 
@@ -78,4 +85,4 @@ GSD integration currently has basic button support. The Go version needs full co
 | Windows Service over Task Scheduler | Runs at boot without login, proper service management | — Pending |
 
 ---
-*Last updated: 2026-03-19 after initialization*
+*Last updated: 2026-03-20 — Phase 1 complete*
