@@ -23,19 +23,17 @@ Control Claude Code remotely from Telegram across multiple projects simultaneous
 
 ### Active
 
-- [ ] Full rewrite of Telegram bot in Go (not a port — clean redesign)
-- [ ] Multi-project support: each project linked to a separate Telegram channel
-- [ ] Independent Claude CLI sessions per project, running simultaneously
-- [ ] Dynamic project-channel assignment: unrecognized channels prompt user to link a project
-- [ ] Full GSD command integration via interactive Telegram button menus (all /gsd: commands)
-- [ ] Updated GSD button functionality matching latest GSD version from GitHub
 - [ ] All media types: text, voice transcription (OpenAI), photos, PDFs (pdftotext), video, audio, documents
 - [ ] Per-channel auth: channel membership = bot access (no global allowlist)
-- [ ] JSON file persistence for project-channel mappings and session state
-- [ ] Streaming responses from Claude with live message updates
 - [ ] Windows Service deployment via NSSM — runs at boot, no terminal window
-- [ ] Rate limiting per channel
-- [ ] Audit logging
+
+### Validated
+
+- [x] Multi-project support: each project linked to a separate Telegram channel — Validated in Phase 2
+- [x] Independent Claude CLI sessions per project, running simultaneously — Validated in Phase 2
+- [x] Dynamic project-channel assignment: unrecognized channels prompt user to link a project — Validated in Phase 2
+- [x] Full GSD command integration via interactive Telegram button menus (all /gsd: commands) — Validated in Phase 2
+- [x] JSON file persistence for project-channel mappings and session state — Validated in Phase 2
 
 ### Out of Scope
 
@@ -85,4 +83,4 @@ GSD integration currently has basic button support. The Go version needs full co
 | Windows Service over Task Scheduler | Runs at boot without login, proper service management | — Pending |
 
 ---
-*Last updated: 2026-03-20 — Phase 1 complete*
+*Last updated: 2026-03-20 — Phase 2 complete*
