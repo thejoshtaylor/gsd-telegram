@@ -97,11 +97,11 @@ func (b *Bot) handleProject(tgBot *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (b *Bot) handleCallback(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleCallback(tgBot, ctx, b.store, b.persist, b.cfg, b.mappings, b.awaitingPath)
+	return bothandlers.HandleCallback(tgBot, ctx, b.store, b.persist, b.cfg, b.mappings, b.awaitingPath, b.WaitGroup(), b.globalAPILimiter)
 }
 
 func (b *Bot) handleGsd(tgBot *gotgbot.Bot, ctx *ext.Context) error {
-	return bothandlers.HandleGsd(tgBot, ctx, b.mappings, b.store, b.cfg, b.WaitGroup())
+	return bothandlers.HandleGsd(tgBot, ctx, b.mappings, b.store, b.cfg, b.WaitGroup(), b.globalAPILimiter)
 }
 
 // passthroughHandler is a no-op handler used as the terminal target for middleware
