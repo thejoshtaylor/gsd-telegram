@@ -32,7 +32,7 @@ See [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md) for full phase deta
 - [x] **Phase 10: Protocol Definitions and Config** - Define all wire message types and extend config with WebSocket env vars (completed 2026-03-20)
 - [x] **Phase 11: WebSocket Connection Manager** - Build and validate outbound WebSocket client with reconnect and heartbeat (completed 2026-03-21)
 - [x] **Phase 12: Telegram Removal and Session Migration** - Delete Telegram layer and migrate session identity from channel IDs to project keys (completed 2026-03-21)
-- [ ] **Phase 13: Dispatch, Instance Management, and Node Lifecycle** - Implement command dispatch, multi-instance management, and end-to-end node wiring
+- [x] **Phase 13: Dispatch, Instance Management, and Node Lifecycle** - Implement command dispatch, multi-instance management, and end-to-end node wiring (completed 2026-03-21)
 - [ ] **Phase 14: Protocol and Server Spec Documents** - Write wire protocol spec and server backend spec from working implementation
 
 ## Phase Details
@@ -90,11 +90,11 @@ Plans:
   4. Node responds to a `status` query with the current running instance list
   5. On SIGINT/SIGTERM: active streams drain, remaining Claude subprocesses are killed (verified absent from process list within 10 seconds), disconnect frame is sent, and the process exits cleanly — no zombie processes
   6. All received commands appear in the audit log with source and command type; per-project rate limiting rejects excess `run` commands; structured log entries include `node_id`, `instance_id`, and `project` fields
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 13-01-PLAN.md — Adapt audit, security, and protocol packages for node-oriented dispatch
 - [x] 13-02-PLAN.md — Build dispatch package: command routing, instance lifecycle, streaming
-- [ ] 13-03-PLAN.md — Wire main.go with full startup and graceful shutdown
+- [x] 13-03-PLAN.md — Wire main.go with full startup and graceful shutdown
 
 ### Phase 14: Protocol and Server Spec Documents
 **Goal**: Written specs that give the server team a complete contract for implementing the server side — derived from the working node, not from intention
@@ -117,5 +117,5 @@ Plans:
 | 10. Protocol Definitions and Config | v1.2 | 2/2 | Complete    | 2026-03-20 |
 | 11. WebSocket Connection Manager | v1.2 | 2/2 | Complete    | 2026-03-21 |
 | 12. Telegram Removal and Session Migration | v1.2 | 2/2 | Complete    | 2026-03-21 |
-| 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 2/3 | In Progress|  |
+| 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 3/3 | Complete   | 2026-03-21 |
 | 14. Protocol and Server Spec Documents | v1.2 | 0/? | Not started | - |

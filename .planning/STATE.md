@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
 status: unknown
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-03-21T01:12:30.261Z"
+stopped_at: Completed 13-03-PLAN.md
+last_updated: "2026-03-21T01:16:11.933Z"
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -57,6 +57,8 @@ Plan: 3 of 3
 - [Phase 13]: ConnectionSender interface over concrete ConnectionManager type — testability without network dependency
 - [Phase 13]: sync.Once on instanceState.done gates terminal event — kill+natural-exit race cannot double-emit
 - [Phase 13]: Instance registered in map before ACK/goroutine spawn — prevents kill arriving before instance is tracked
+- [Phase 13]: ConnectionManager.Start() before Dispatcher.Run() — recv channel must be ready before dispatcher reads from it
+- [Phase 13]: Shutdown order: cancel context -> Stop dispatcher -> Wait (10s timeout) -> Stop ConnectionManager — ensures disconnect frame sent after instances drain
 
 ### Pending Todos
 
@@ -77,6 +79,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T01:12:30.251Z
-Stopped at: Completed 13-02-PLAN.md
+Last session: 2026-03-21T01:16:11.926Z
+Stopped at: Completed 13-03-PLAN.md
 Resume file: None
