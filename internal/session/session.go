@@ -1,8 +1,9 @@
-// Package session provides per-channel session management for the gsd-tele-go bot.
+// Package session provides per-instance session management for the gsd-tele-go node.
 //
-// Each channel gets its own independent Session with a worker goroutine that
-// processes messages serially from a buffered queue. Sessions can be stopped
-// mid-query using the Stop method, which cancels the underlying claude.Process.
+// Each instance (identified by a string instance ID or project name) gets its own
+// independent Session with a worker goroutine that processes messages serially from
+// a buffered queue. Sessions can be stopped mid-query using the Stop method, which
+// cancels the underlying claude.Process.
 package session
 
 import (
@@ -26,23 +27,20 @@ const (
 	StateStopping
 )
 
-// StatusCallbackFactory creates a StatusCallback for a given chat ID.
+// StatusCallbackFactory creates a StatusCallback for a given instance ID.
 // It is called by the worker goroutine immediately before sending a message to Claude,
-// so the callback can reference the correct Telegram message for live updates.
-type StatusCallbackFactory func(chatID int64) claude.StatusCallback
+// so the callback can reference the correct instance for live updates.
+type StatusCallbackFactory func(instanceID string) claude.StatusCallback
 
 // QueuedMessage is a single message waiting to be processed by a Session worker.
 type QueuedMessage struct {
 	// Text is the raw message text to send to Claude.
 	Text string
 
-	// ChatID is the Telegram chat ID — used to create the status callback.
-	ChatID int64
+	// InstanceID is the instance identifier — used to create the status callback.
+	InstanceID string
 
-	// UserID is the Telegram user ID (for audit logging).
-	UserID int64
-
-	// Callback creates a StatusCallback for streaming updates to Telegram.
+	// Callback creates a StatusCallback for streaming updates.
 	Callback StatusCallbackFactory
 
 	// ErrCh receives the result when the query completes (nil on success).
@@ -70,7 +68,7 @@ type WorkerConfig struct {
 	testArgs []string
 }
 
-// Session owns the Claude session lifecycle for a single Telegram channel.
+// Session owns the Claude session lifecycle for a single instance.
 //
 // Messages are enqueued via Enqueue and processed serially by the Worker goroutine.
 // All mutable fields are protected by mu; workingDir is immutable after construction.
@@ -348,7 +346,7 @@ func (s *Session) processMessage(ctx context.Context, claudePath string, cfg Wor
 	// Create status callback using the factory.
 	var cb claude.StatusCallback
 	if msg.Callback != nil {
-		cb = msg.Callback(msg.ChatID)
+		cb = msg.Callback(msg.InstanceID)
 	} else {
 		cb = func(_ claude.ClaudeEvent) error { return nil }
 	}
