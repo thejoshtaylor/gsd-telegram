@@ -30,7 +30,7 @@ See [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md) for full phase deta
 **Milestone Goal:** Replace Telegram bot interface with a custom WebSocket-based communication protocol, transforming the bot into standalone node software that connects to a central server.
 
 - [x] **Phase 10: Protocol Definitions and Config** - Define all wire message types and extend config with WebSocket env vars (completed 2026-03-20)
-- [ ] **Phase 11: WebSocket Connection Manager** - Build and validate outbound WebSocket client with reconnect and heartbeat
+- [x] **Phase 11: WebSocket Connection Manager** - Build and validate outbound WebSocket client with reconnect and heartbeat (completed 2026-03-21)
 - [ ] **Phase 12: Telegram Removal and Session Migration** - Delete Telegram layer and migrate session identity from channel IDs to project keys
 - [ ] **Phase 13: Dispatch, Instance Management, and Node Lifecycle** - Implement command dispatch, multi-instance management, and end-to-end node wiring
 - [ ] **Phase 14: Protocol and Server Spec Documents** - Write wire protocol spec and server backend spec from working implementation
@@ -60,10 +60,10 @@ Plans:
   3. Node sends a registration frame after every reconnect, including re-register after recovery from drop
   4. Node sends an explicit disconnect frame on clean shutdown and does not reconnect afterward
   5. A stress test sending concurrent frames from multiple goroutines completes without panic — the single writer goroutine serializes all writes
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 11-01-PLAN.md — ConnectionManager core: dial, backoff, single writer, dependencies
-- [ ] 11-02-PLAN.md — Heartbeat, registration, reconnect recovery, clean shutdown
+- [x] 11-02-PLAN.md — Heartbeat, registration, reconnect recovery, clean shutdown
 
 ### Phase 12: Telegram Removal and Session Migration
 **Goal**: Zero Telegram imports in the codebase and session persistence keyed by project name rather than channel ID, so the dispatch layer can be built against clean identity types
@@ -108,7 +108,7 @@ Plans:
 | 8. Polling Stability | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 9. Channel Auth | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 10. Protocol Definitions and Config | v1.2 | 2/2 | Complete    | 2026-03-20 |
-| 11. WebSocket Connection Manager | v1.2 | 1/2 | In Progress|  |
+| 11. WebSocket Connection Manager | v1.2 | 2/2 | Complete   | 2026-03-21 |
 | 12. Telegram Removal and Session Migration | v1.2 | 0/? | Not started | - |
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 0/? | Not started | - |
 | 14. Protocol and Server Spec Documents | v1.2 | 0/? | Not started | - |

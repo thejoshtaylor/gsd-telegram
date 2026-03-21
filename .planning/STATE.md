@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
 status: unknown
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-20T23:48:54.483Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-03-21T00:09:17.549Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -44,6 +44,8 @@ Plan: 2 of 2
 - [Phase 10-02]: NodeConfig separate from Config — no Telegram env vars required for WebSocket config
 - [Phase 11]: Two-phase stopCh check in Send() prevents race when sendCh has buffer capacity after Stop()
 - [Phase 11]: recvCh uses non-blocking send with drop+warn to avoid stalling reader goroutine on inbound frames
+- [Phase 11]: Writer goroutine owns clean shutdown: sends NodeDisconnect then conn.Close() before exiting — ensures disconnect frame written while connection is healthy
+- [Phase 11]: Stop() defers m.cancel() until after m.stopped: prevents context cancellation race with coder/websocket closing connection before disconnect frame is sent
 
 ### Pending Todos
 
@@ -64,6 +66,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20T23:48:54.472Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-03-21T00:09:17.544Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None

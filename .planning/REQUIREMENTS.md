@@ -10,10 +10,10 @@ Requirements for the custom webapp milestone. Each maps to roadmap phases.
 ### Transport
 
 - [x] **XPORT-01**: Node connects outbound to server via WebSocket (`wss://`) with TLS
-- [ ] **XPORT-02**: Node sends heartbeat ping every 30s; detects dead connection via pong timeout
-- [ ] **XPORT-03**: Node automatically reconnects with exponential backoff (500ms–30s) and jitter
-- [ ] **XPORT-04**: Node re-registers with server after every reconnect
-- [ ] **XPORT-05**: Node sends explicit disconnect frame on clean shutdown
+- [x] **XPORT-02**: Node sends heartbeat ping every 30s; detects dead connection via pong timeout
+- [x] **XPORT-03**: Node automatically reconnects with exponential backoff (500ms–30s) and jitter
+- [x] **XPORT-04**: Node re-registers with server after every reconnect
+- [x] **XPORT-05**: Node sends explicit disconnect frame on clean shutdown
 - [x] **XPORT-06**: All outbound WebSocket writes go through a single writer goroutine
 
 ### Protocol
@@ -85,10 +85,10 @@ Deferred to v1.2.x or later. Tracked but not in current roadmap.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | XPORT-01 | Phase 11 | Complete |
-| XPORT-02 | Phase 11 | Pending |
-| XPORT-03 | Phase 11 | Pending |
-| XPORT-04 | Phase 11 | Pending |
-| XPORT-05 | Phase 11 | Pending |
+| XPORT-02 | Phase 11 | Complete |
+| XPORT-03 | Phase 11 | Complete |
+| XPORT-04 | Phase 11 | Complete |
+| XPORT-05 | Phase 11 | Complete |
 | XPORT-06 | Phase 11 | Complete |
 | PROTO-01 | Phase 10 | Complete |
 | PROTO-02 | Phase 10 | Complete |
