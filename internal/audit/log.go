@@ -11,22 +11,23 @@ import (
 
 // Event represents a single audit log entry.
 type Event struct {
-	Timestamp string `json:"timestamp"`
-	Action    string `json:"action"`
-	UserID    int64  `json:"user_id"`
-	Username  string `json:"username,omitempty"`
-	ChannelID int64  `json:"channel_id"`
-	Message   string `json:"message,omitempty"`
-	Error     string `json:"error,omitempty"`
+	Timestamp  string `json:"timestamp"`
+	Action     string `json:"action"`
+	Source     string `json:"source"`
+	NodeID     string `json:"node_id"`
+	InstanceID string `json:"instance_id,omitempty"`
+	Project    string `json:"project,omitempty"`
+	Message    string `json:"message,omitempty"`
+	Error      string `json:"error,omitempty"`
 }
 
 // NewEvent creates an Event with Timestamp set to the current UTC time in RFC3339 format.
-func NewEvent(action string, userID int64, channelID int64) Event {
+func NewEvent(action, source, nodeID string) Event {
 	return Event{
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 		Action:    action,
-		UserID:    userID,
-		ChannelID: channelID,
+		Source:    source,
+		NodeID:    nodeID,
 	}
 }
 

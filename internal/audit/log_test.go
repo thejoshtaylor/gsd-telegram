@@ -3,6 +3,7 @@ package audit
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"sync"
 	"testing"
@@ -24,9 +25,8 @@ func TestAuditLogWrite(t *testing.T) {
 	}
 	defer logger.Close()
 
-	evt := NewEvent("message", 12345, 67890)
-	evt.Username = "testuser"
-	evt.Message = "hello"
+	evt := NewEvent("execute", "cmd-abc", "node-1")
+	evt.InstanceID = "inst-1"
 
 	if err := logger.Log(evt); err != nil {
 		t.Fatalf("Log: %v", err)
@@ -46,11 +46,14 @@ func TestAuditLogWrite(t *testing.T) {
 	if got["timestamp"] == nil {
 		t.Error("expected timestamp field")
 	}
-	if got["action"] != "message" {
-		t.Errorf("action = %v, want %q", got["action"], "message")
+	if got["action"] != "execute" {
+		t.Errorf("action = %v, want %q", got["action"], "execute")
 	}
-	if got["user_id"] == nil {
-		t.Error("expected user_id field")
+	if got["source"] == nil {
+		t.Error("expected source field")
+	}
+	if got["node_id"] == nil {
+		t.Error("expected node_id field")
 	}
 }
 
@@ -70,7 +73,7 @@ func TestAuditLogAppendOnly(t *testing.T) {
 	}
 
 	for i := 0; i < 2; i++ {
-		evt := NewEvent("message", int64(i), 999)
+		evt := NewEvent("execute", fmt.Sprintf("cmd-%d", i), "node-1")
 		if err := logger.Log(evt); err != nil {
 			t.Fatalf("Log[%d]: %v", i, err)
 		}
@@ -128,7 +131,7 @@ func TestAuditLogConcurrent(t *testing.T) {
 		go func(g int) {
 			defer wg.Done()
 			for i := 0; i < eventsPerGoroutine; i++ {
-				evt := NewEvent("message", int64(g), int64(i))
+				evt := NewEvent("execute", fmt.Sprintf("cmd-%d-%d", g, i), "node-1")
 				if err := logger.Log(evt); err != nil {
 					t.Errorf("goroutine %d Log: %v", g, err)
 				}
