@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
 status: unknown
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-03-21T00:33:04.081Z"
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-03-21T00:34:46.587Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -48,6 +48,9 @@ Plan: 2 of 2
 - [Phase 11]: Stop() defers m.cancel() until after m.stopped: prevents context cancellation race with coder/websocket closing connection before disconnect frame is sent
 - [Phase 12]: QueuedMessage.UserID (Telegram user ID) dropped entirely — source tracking will be added differently in Phase 13 dispatch layer
 - [Phase 12]: MigrationResult.UnmappedEntries uses descriptive strings for human-readable logs; migration is one-time operation
+- [Phase 12-telegram-removal-and-session-migration]: Telegram constant block removed entirely — TelegramMessageLimit etc are node-irrelevant
+- [Phase 12-telegram-removal-and-session-migration]: Default audit log renamed from claude-telegram-audit.log to gsd-node-audit.log
+- [Phase 12-telegram-removal-and-session-migration]: Config.Load() no longer requires TELEGRAM_BOT_TOKEN or TELEGRAM_ALLOWED_USERS
 
 ### Pending Todos
 
@@ -68,6 +71,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T00:33:04.072Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-03-21T00:34:46.581Z
+Stopped at: Completed 12-01-PLAN.md
 Resume file: None

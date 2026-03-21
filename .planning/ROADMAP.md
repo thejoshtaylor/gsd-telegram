@@ -31,7 +31,7 @@ See [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md) for full phase deta
 
 - [x] **Phase 10: Protocol Definitions and Config** - Define all wire message types and extend config with WebSocket env vars (completed 2026-03-20)
 - [x] **Phase 11: WebSocket Connection Manager** - Build and validate outbound WebSocket client with reconnect and heartbeat (completed 2026-03-21)
-- [ ] **Phase 12: Telegram Removal and Session Migration** - Delete Telegram layer and migrate session identity from channel IDs to project keys
+- [x] **Phase 12: Telegram Removal and Session Migration** - Delete Telegram layer and migrate session identity from channel IDs to project keys (completed 2026-03-21)
 - [ ] **Phase 13: Dispatch, Instance Management, and Node Lifecycle** - Implement command dispatch, multi-instance management, and end-to-end node wiring
 - [ ] **Phase 14: Protocol and Server Spec Documents** - Write wire protocol spec and server backend spec from working implementation
 
@@ -74,9 +74,9 @@ Plans:
   2. TypeScript source files and Bun/npm configuration files are absent from the repository
   3. `internal/session` compiles with `InstanceStore` keyed by `string` (instance UUID); `QueuedMessage` uses `InstanceID string` rather than `ChatID int64`
   4. `sessions.json` on disk uses project-name keys; a migration script converts existing channel-ID-keyed records, logging any unmappable entries rather than silently discarding them
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 12-01-PLAN.md — Delete Telegram packages, TypeScript files, strip dependencies and config
+- [x] 12-01-PLAN.md — Delete Telegram packages, TypeScript files, strip dependencies and config
 - [x] 12-02-PLAN.md — Rekey session persistence from channel IDs to instance/project strings
 
 ### Phase 13: Dispatch, Instance Management, and Node Lifecycle
@@ -112,6 +112,6 @@ Plans:
 | 9. Channel Auth | v1.1 | 1/1 | Complete | 2026-03-20 |
 | 10. Protocol Definitions and Config | v1.2 | 2/2 | Complete    | 2026-03-20 |
 | 11. WebSocket Connection Manager | v1.2 | 2/2 | Complete    | 2026-03-21 |
-| 12. Telegram Removal and Session Migration | v1.2 | 1/2 | In Progress|  |
+| 12. Telegram Removal and Session Migration | v1.2 | 2/2 | Complete   | 2026-03-21 |
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 0/? | Not started | - |
 | 14. Protocol and Server Spec Documents | v1.2 | 0/? | Not started | - |
