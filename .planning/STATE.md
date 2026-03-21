@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
 status: unknown
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-03-21T00:34:46.587Z"
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-03-21T01:06:29.671Z"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Run and orchestrate multiple Claude Code instances across projects from a central server, with each node managing its own local Claude sessions independently.
-**Current focus:** Phase 12 — telegram-removal-and-session-migration
+**Current focus:** Phase 13 — dispatch-instance-management-and-node-lifecycle
 
 ## Current Position
 
-Phase: 12 (telegram-removal-and-session-migration) — EXECUTING
-Plan: 2 of 2
+Phase: 13 (dispatch-instance-management-and-node-lifecycle) — EXECUTING
+Plan: 2 of 3
 
 ## Accumulated Context
 
@@ -51,6 +51,9 @@ Plan: 2 of 2
 - [Phase 12-telegram-removal-and-session-migration]: Telegram constant block removed entirely — TelegramMessageLimit etc are node-irrelevant
 - [Phase 12-telegram-removal-and-session-migration]: Default audit log renamed from claude-telegram-audit.log to gsd-node-audit.log
 - [Phase 12-telegram-removal-and-session-migration]: Config.Load() no longer requires TELEGRAM_BOT_TOKEN or TELEGRAM_ALLOWED_USERS
+- [Phase 13]: ProjectRateLimiter.Allow() returns bool only — dispatcher needs allow/deny not delay duration
+- [Phase 13]: protocol.NewMsgID() is canonical ID generator; connection.generateMsgID() delegates to it
+- [Phase 13]: audit.Event redesigned with Source/NodeID/InstanceID/Project — Telegram int64 fields removed entirely
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T00:34:46.581Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-03-21T01:06:29.664Z
+Stopped at: Completed 13-01-PLAN.md
 Resume file: None

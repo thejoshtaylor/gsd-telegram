@@ -39,9 +39,9 @@ Requirements for the custom webapp milestone. Each maps to roadmap phases.
 - [x] **NODE-01**: Node ID auto-derived from hardware identifiers (machine ID or hostname hash) — not user-configured
 - [x] **NODE-02**: Config via `.env`: `SERVER_URL`, `SERVER_TOKEN`, `HEARTBEAT_INTERVAL_SECS`
 - [ ] **NODE-03**: Graceful shutdown drains active streams, kills remaining processes, sends disconnect
-- [ ] **NODE-04**: Per-project rate limiting on incoming `run` commands using token bucket
+- [x] **NODE-04**: Per-project rate limiting on incoming `run` commands using token bucket
 - [ ] **NODE-05**: Structured logging with `node_id`, `instance_id`, `project` context fields
-- [ ] **NODE-06**: Audit logging for all received commands with source and command type
+- [x] **NODE-06**: Audit logging for all received commands with source and command type
 
 ### Cleanup
 
@@ -105,9 +105,9 @@ Deferred to v1.2.x or later. Tracked but not in current roadmap.
 | NODE-01 | Phase 10 | Complete |
 | NODE-02 | Phase 10 | Complete |
 | NODE-03 | Phase 13 | Pending |
-| NODE-04 | Phase 13 | Pending |
+| NODE-04 | Phase 13 | Complete |
 | NODE-05 | Phase 13 | Pending |
-| NODE-06 | Phase 13 | Pending |
+| NODE-06 | Phase 13 | Complete |
 | CLEAN-01 | Phase 12 | Complete |
 | CLEAN-02 | Phase 12 | Complete |
 | CLEAN-03 | Phase 12 | Complete |
