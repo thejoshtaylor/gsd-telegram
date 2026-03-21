@@ -458,3 +458,179 @@ func TestConcurrentSend(t *testing.T) {
 		t.Errorf("only %d/1000 frames received before timeout", frameCount.Load())
 	}
 }
+
+// TestCleanShutdown verifies that Stop() causes the manager to send a
+// NodeDisconnect frame before the WebSocket close frame.
+func TestCleanShutdown(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	disconnectReceived := make(chan struct{})
+	serverDone := make(chan struct{})
+
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		defer close(serverDone)
+		ctx := context.Background()
+		// Read frames until WebSocket closes. Look for NodeDisconnect.
+		for {
+			_, data, err := conn.Read(ctx)
+			if err != nil {
+				// Connection closed — check if we got the disconnect frame.
+				return
+			}
+			var env protocol.Envelope
+			if json.Unmarshal(data, &env) == nil && env.Type == protocol.TypeNodeDisconnect {
+				close(disconnectReceived)
+			}
+		}
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	m.Start(ctx)
+
+	// Wait for connection and registration.
+	time.Sleep(200 * time.Millisecond)
+
+	// Stop the manager — should send disconnect frame.
+	m.Stop()
+
+	// Wait for server to finish.
+	select {
+	case <-serverDone:
+	case <-time.After(5 * time.Second):
+		t.Fatal("server handler did not exit")
+	}
+
+	// Verify disconnect frame was received.
+	select {
+	case <-disconnectReceived:
+		// Good — NodeDisconnect received before close.
+	default:
+		t.Error("server did not receive NodeDisconnect frame before WebSocket close")
+	}
+}
+
+// TestNoReconnectAfterStop verifies that after Stop(), the manager does not
+// attempt to reconnect — exactly 1 connection is established.
+func TestNoReconnectAfterStop(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	var connCount atomic.Int64
+	serverDone := make(chan struct{}, 10) // buffered to handle multiple connections
+
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		connCount.Add(1)
+		ctx := context.Background()
+		// Drain frames until connection closes.
+		for {
+			if _, _, err := conn.Read(ctx); err != nil {
+				serverDone <- struct{}{}
+				return
+			}
+		}
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	m.Start(ctx)
+
+	// Wait for connection to establish.
+	time.Sleep(200 * time.Millisecond)
+
+	m.Stop()
+
+	// Wait 500ms to confirm no reconnect occurs.
+	time.Sleep(500 * time.Millisecond)
+
+	count := connCount.Load()
+	if count != 1 {
+		t.Errorf("connection count = %d, want 1 (no reconnect after Stop)", count)
+	}
+}
+
+// TestReconnectAfterDrop verifies that when the server closes the connection,
+// the manager reconnects and sends a second NodeRegister frame.
+func TestReconnectAfterDrop(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	var connCount atomic.Int64
+	secondConnRegistered := make(chan time.Time, 1)
+	var dropTime time.Time
+	var dropTimeMu sync.Mutex
+
+	wsURL, srv := newMockServer(t, func(conn *websocket.Conn) {
+		defer conn.CloseNow()
+		n := connCount.Add(1)
+		ctx := context.Background()
+
+		// Read the NodeRegister frame.
+		_, data, err := conn.Read(ctx)
+		if err != nil {
+			return
+		}
+		var env protocol.Envelope
+		if err := json.Unmarshal(data, &env); err != nil {
+			return
+		}
+		if env.Type != protocol.TypeNodeRegister {
+			return
+		}
+
+		if n == 1 {
+			// First connection: record drop time and close to trigger reconnect.
+			dropTimeMu.Lock()
+			dropTime = time.Now()
+			dropTimeMu.Unlock()
+			// Close with StatusGoingAway to simulate network drop.
+			conn.Close(websocket.StatusGoingAway, "simulated drop")
+		} else {
+			// Second connection: record when registration arrived.
+			secondConnRegistered <- time.Now()
+			// Drain until manager stops.
+			for {
+				if _, _, err := conn.Read(ctx); err != nil {
+					return
+				}
+			}
+		}
+	})
+	defer srv.Close()
+
+	cfg := newTestConfig(wsURL)
+	m := NewConnectionManager(cfg, zerolog.Nop())
+	m.SetHTTPClient(srv.Client())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	m.Start(ctx)
+	defer m.Stop()
+
+	select {
+	case reconnectTime := <-secondConnRegistered:
+		dropTimeMu.Lock()
+		drop := dropTime
+		dropTimeMu.Unlock()
+		elapsed := reconnectTime.Sub(drop)
+		if elapsed < 0 {
+			t.Error("reconnect time before drop time")
+		}
+		if elapsed > 2*time.Second {
+			t.Errorf("reconnect took %v, want < 2s", elapsed)
+		}
+		t.Logf("reconnect after drop: %v", elapsed)
+	case <-time.After(10 * time.Second):
+		t.Error("did not reconnect after server drop within 10s")
+	}
+}
