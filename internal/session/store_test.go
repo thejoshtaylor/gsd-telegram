@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-// TestGetOrCreateNew verifies that GetOrCreate returns a fresh session for a new channel ID.
+// TestGetOrCreateNew verifies that GetOrCreate returns a fresh session for a new instance ID.
 func TestGetOrCreateNew(t *testing.T) {
 	store := NewSessionStore()
-	sess := store.GetOrCreate(1001, "/tmp/project")
+	sess := store.GetOrCreate("inst-1001", "/tmp/project")
 
 	if sess == nil {
 		t.Fatal("expected non-nil session")
@@ -21,11 +21,11 @@ func TestGetOrCreateNew(t *testing.T) {
 // TestGetOrCreateExisting verifies that calling GetOrCreate twice returns the same pointer.
 func TestGetOrCreateExisting(t *testing.T) {
 	store := NewSessionStore()
-	first := store.GetOrCreate(1002, "/tmp/a")
-	second := store.GetOrCreate(1002, "/tmp/b") // workingDir arg ignored on second call
+	first := store.GetOrCreate("inst-1002", "/tmp/a")
+	second := store.GetOrCreate("inst-1002", "/tmp/b") // workingDir arg ignored on second call
 
 	if first != second {
-		t.Error("expected same *Session pointer for same channelID")
+		t.Error("expected same *Session pointer for same instanceID")
 	}
 	// Working dir should be from the first creation, not the second.
 	if second.WorkingDir() != "/tmp/a" {
@@ -33,15 +33,15 @@ func TestGetOrCreateExisting(t *testing.T) {
 	}
 }
 
-// TestGetNonExistent verifies that Get returns (nil, false) for an unknown channel ID.
+// TestGetNonExistent verifies that Get returns (nil, false) for an unknown instance ID.
 func TestGetNonExistent(t *testing.T) {
 	store := NewSessionStore()
-	sess, ok := store.Get(9999)
+	sess, ok := store.Get("unknown")
 	if ok {
-		t.Error("expected ok=false for unknown channel")
+		t.Error("expected ok=false for unknown instance")
 	}
 	if sess != nil {
-		t.Error("expected nil session for unknown channel")
+		t.Error("expected nil session for unknown instance")
 	}
 }
 
@@ -59,7 +59,7 @@ func TestConcurrentGetOrCreate(t *testing.T) {
 		i := i
 		go func() {
 			defer wg.Done()
-			results[i] = store.GetOrCreate(5000, "/tmp/concurrent")
+			results[i] = store.GetOrCreate("inst-concurrent", "/tmp/concurrent")
 		}()
 	}
 	wg.Wait()
@@ -76,11 +76,11 @@ func TestConcurrentGetOrCreate(t *testing.T) {
 // TestRemove verifies that after Remove, Get returns (nil, false).
 func TestRemove(t *testing.T) {
 	store := NewSessionStore()
-	store.GetOrCreate(2001, "/tmp/remove")
+	store.GetOrCreate("inst-2001", "/tmp/remove")
 
-	store.Remove(2001)
+	store.Remove("inst-2001")
 
-	sess, ok := store.Get(2001)
+	sess, ok := store.Get("inst-2001")
 	if ok {
 		t.Error("expected ok=false after Remove")
 	}
@@ -97,14 +97,14 @@ func TestCount(t *testing.T) {
 		t.Errorf("expected 0, got %d", n)
 	}
 
-	store.GetOrCreate(3001, "/a")
-	store.GetOrCreate(3002, "/b")
+	store.GetOrCreate("inst-3001", "/a")
+	store.GetOrCreate("inst-3002", "/b")
 
 	if n := store.Count(); n != 2 {
 		t.Errorf("expected 2, got %d", n)
 	}
 
-	store.Remove(3001)
+	store.Remove("inst-3001")
 
 	if n := store.Count(); n != 1 {
 		t.Errorf("expected 1, got %d", n)
@@ -114,8 +114,8 @@ func TestCount(t *testing.T) {
 // TestAll verifies that All returns a copy of the sessions map.
 func TestAll(t *testing.T) {
 	store := NewSessionStore()
-	store.GetOrCreate(4001, "/x")
-	store.GetOrCreate(4002, "/y")
+	store.GetOrCreate("inst-4001", "/x")
+	store.GetOrCreate("inst-4002", "/y")
 
 	all := store.All()
 	if len(all) != 2 {
@@ -123,7 +123,7 @@ func TestAll(t *testing.T) {
 	}
 
 	// Modifying the returned map must not affect the store.
-	delete(all, 4001)
+	delete(all, "inst-4001")
 	if store.Count() != 2 {
 		t.Error("modifying All() result changed store count")
 	}

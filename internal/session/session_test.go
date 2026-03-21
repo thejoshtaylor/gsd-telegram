@@ -36,7 +36,7 @@ func TestNewSession(t *testing.T) {
 func TestEnqueueAndDequeue(t *testing.T) {
 	sess := NewSession("/tmp/test")
 
-	msg := QueuedMessage{Text: "hello world", ChatID: 42, UserID: 7}
+	msg := QueuedMessage{Text: "hello world", InstanceID: "inst-42"}
 	ok := sess.Enqueue(msg)
 	if !ok {
 		t.Fatal("Enqueue returned false on empty queue")
@@ -47,8 +47,8 @@ func TestEnqueueAndDequeue(t *testing.T) {
 		if got.Text != "hello world" {
 			t.Errorf("expected text %q, got %q", "hello world", got.Text)
 		}
-		if got.ChatID != 42 {
-			t.Errorf("expected ChatID 42, got %d", got.ChatID)
+		if got.InstanceID != "inst-42" {
+			t.Errorf("expected InstanceID inst-42, got %q", got.InstanceID)
 		}
 	case <-time.After(time.Second):
 		t.Fatal("timed out reading from queue")
@@ -187,10 +187,10 @@ func TestProcessMessageCapturesUsage(t *testing.T) {
 	cfg := WorkerConfig{FilteredEnv: os.Environ(), testArgs: args}
 	ctx := context.Background()
 	msg := QueuedMessage{
-		Text:   "",
-		ChatID: 1,
-		ErrCh:  make(chan error, 1),
-		Callback: func(_ int64) claude.StatusCallback {
+		Text:       "",
+		InstanceID: "inst-1",
+		ErrCh:      make(chan error, 1),
+		Callback: func(_ string) claude.StatusCallback {
 			return func(_ claude.ClaudeEvent) error { return nil }
 		},
 	}
@@ -241,10 +241,10 @@ func TestProcessMessageCapturesContextPercent(t *testing.T) {
 	cfg := WorkerConfig{FilteredEnv: os.Environ(), testArgs: args}
 	ctx := context.Background()
 	msg := QueuedMessage{
-		Text:   "",
-		ChatID: 1,
-		ErrCh:  make(chan error, 1),
-		Callback: func(_ int64) claude.StatusCallback {
+		Text:       "",
+		InstanceID: "inst-1",
+		ErrCh:      make(chan error, 1),
+		Callback: func(_ string) claude.StatusCallback {
 			return func(_ claude.ClaudeEvent) error { return nil }
 		},
 	}
@@ -288,10 +288,10 @@ func TestProcessMessageNoUsageOnContextLimit(t *testing.T) {
 	cfg := WorkerConfig{FilteredEnv: os.Environ(), testArgs: args}
 	ctx := context.Background()
 	msg := QueuedMessage{
-		Text:   "",
-		ChatID: 1,
-		ErrCh:  make(chan error, 1),
-		Callback: func(_ int64) claude.StatusCallback {
+		Text:       "",
+		InstanceID: "inst-1",
+		ErrCh:      make(chan error, 1),
+		Callback: func(_ string) claude.StatusCallback {
 			return func(_ claude.ClaudeEvent) error { return nil }
 		},
 	}
