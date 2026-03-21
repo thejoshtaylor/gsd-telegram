@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
 status: unknown
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-03-21T00:09:17.549Z"
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-03-21T00:33:04.081Z"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Run and orchestrate multiple Claude Code instances across projects from a central server, with each node managing its own local Claude sessions independently.
-**Current focus:** Phase 11 — websocket-connection-manager
+**Current focus:** Phase 12 — telegram-removal-and-session-migration
 
 ## Current Position
 
-Phase: 11 (websocket-connection-manager) — EXECUTING
+Phase: 12 (telegram-removal-and-session-migration) — EXECUTING
 Plan: 2 of 2
 
 ## Accumulated Context
@@ -46,6 +46,8 @@ Plan: 2 of 2
 - [Phase 11]: recvCh uses non-blocking send with drop+warn to avoid stalling reader goroutine on inbound frames
 - [Phase 11]: Writer goroutine owns clean shutdown: sends NodeDisconnect then conn.Close() before exiting — ensures disconnect frame written while connection is healthy
 - [Phase 11]: Stop() defers m.cancel() until after m.stopped: prevents context cancellation race with coder/websocket closing connection before disconnect frame is sent
+- [Phase 12]: QueuedMessage.UserID (Telegram user ID) dropped entirely — source tracking will be added differently in Phase 13 dispatch layer
+- [Phase 12]: MigrationResult.UnmappedEntries uses descriptive strings for human-readable logs; migration is one-time operation
 
 ### Pending Todos
 
@@ -66,6 +68,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21T00:09:17.544Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-03-21T00:33:04.072Z
+Stopped at: Completed 12-02-PLAN.md
 Resume file: None
