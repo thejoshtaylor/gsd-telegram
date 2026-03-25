@@ -109,6 +109,69 @@ func TestLoadNodeConfigRejectsInsecureWS(t *testing.T) {
 	}
 }
 
+// TestLoadNodeConfigProjects verifies that PROJECTS="alpha, beta,gamma" produces []string{"alpha", "beta", "gamma"}.
+func TestLoadNodeConfigProjects(t *testing.T) {
+	t.Setenv("SERVER_URL", "wss://example.com/ws")
+	t.Setenv("SERVER_TOKEN", "secret")
+	t.Setenv("PROJECTS", "alpha, beta,gamma")
+
+	cfg, err := LoadNodeConfig()
+	if err != nil {
+		t.Fatalf("LoadNodeConfig() returned error: %v", err)
+	}
+
+	if len(cfg.Projects) != 3 {
+		t.Fatalf("Projects len = %d, want 3; got %v", len(cfg.Projects), cfg.Projects)
+	}
+	if cfg.Projects[0] != "alpha" {
+		t.Errorf("Projects[0] = %q, want %q", cfg.Projects[0], "alpha")
+	}
+	if cfg.Projects[1] != "beta" {
+		t.Errorf("Projects[1] = %q, want %q", cfg.Projects[1], "beta")
+	}
+	if cfg.Projects[2] != "gamma" {
+		t.Errorf("Projects[2] = %q, want %q", cfg.Projects[2], "gamma")
+	}
+}
+
+// TestLoadNodeConfigProjectsEmpty verifies that PROJECTS="" produces a non-nil empty slice.
+func TestLoadNodeConfigProjectsEmpty(t *testing.T) {
+	t.Setenv("SERVER_URL", "wss://example.com/ws")
+	t.Setenv("SERVER_TOKEN", "secret")
+	t.Setenv("PROJECTS", "")
+
+	cfg, err := LoadNodeConfig()
+	if err != nil {
+		t.Fatalf("LoadNodeConfig() returned error: %v", err)
+	}
+
+	if cfg.Projects == nil {
+		t.Error("Projects should not be nil when PROJECTS is empty — want []string{}")
+	}
+	if len(cfg.Projects) != 0 {
+		t.Errorf("Projects len = %d, want 0; got %v", len(cfg.Projects), cfg.Projects)
+	}
+}
+
+// TestLoadNodeConfigProjectsSingleItem verifies that PROJECTS="solo" produces []string{"solo"}.
+func TestLoadNodeConfigProjectsSingleItem(t *testing.T) {
+	t.Setenv("SERVER_URL", "wss://example.com/ws")
+	t.Setenv("SERVER_TOKEN", "secret")
+	t.Setenv("PROJECTS", "solo")
+
+	cfg, err := LoadNodeConfig()
+	if err != nil {
+		t.Fatalf("LoadNodeConfig() returned error: %v", err)
+	}
+
+	if len(cfg.Projects) != 1 {
+		t.Fatalf("Projects len = %d, want 1; got %v", len(cfg.Projects), cfg.Projects)
+	}
+	if cfg.Projects[0] != "solo" {
+		t.Errorf("Projects[0] = %q, want %q", cfg.Projects[0], "solo")
+	}
+}
+
 // TestLoadNodeConfigNoTelegramRequired verifies that LoadNodeConfig succeeds without Telegram env vars.
 func TestLoadNodeConfigNoTelegramRequired(t *testing.T) {
 	t.Setenv("SERVER_URL", "wss://example.com/ws")

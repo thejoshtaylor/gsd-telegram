@@ -23,6 +23,10 @@ type NodeConfig struct {
 
 	// NodeID is the hardware-derived node identifier (auto-populated, not from env).
 	NodeID string
+
+	// Projects is the list of project names this node can handle. Optional.
+	// Parsed from PROJECTS env var (comma-separated). Empty means no projects configured.
+	Projects []string
 }
 
 // LoadNodeConfig reads node configuration from environment variables (and .env if present).
@@ -57,6 +61,16 @@ func LoadNodeConfig() (*NodeConfig, error) {
 			return nil, fmt.Errorf("invalid HEARTBEAT_INTERVAL_SECS: %q", v)
 		}
 		cfg.HeartbeatIntervalSecs = n
+	}
+
+	// --- PROJECTS (optional, comma-separated list) ---
+	cfg.Projects = []string{}
+	if v := os.Getenv("PROJECTS"); v != "" {
+		for _, p := range strings.Split(v, ",") {
+			if trimmed := strings.TrimSpace(p); trimmed != "" {
+				cfg.Projects = append(cfg.Projects, trimmed)
+			}
+		}
 	}
 
 	// --- NodeID (auto-derived, not from env) ---
