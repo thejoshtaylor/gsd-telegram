@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Custom Webapp
-status: Ready to plan
-last_updated: "2026-03-25T07:13:01.616Z"
+status: Phase complete — ready for verification
+last_updated: "2026-03-25T07:28:45.722Z"
 last_activity: 2026-03-25
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 7
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Run and orchestrate multiple Claude Code instances across projects from a central server, with each node managing its own local Claude sessions independently.
-**Current focus:** Phase 15 — project-config-and-registration
+**Current focus:** Phase 16 — instance-lifecycle-fixes
 
 ## Current Position
 
-Phase: 16
-Plan: Not started
+Phase: 16 (instance-lifecycle-fixes) — EXECUTING
+Plan: 1 of 1
 
 ## Accumulated Context
 
@@ -63,6 +63,7 @@ Plan: Not started
 - [Phase 14]: Grouped message types by direction (outbound vs inbound) for server implementer clarity
 - [Phase 15]: Non-nil empty slice default for Projects: cfg.Projects = []string{} before optional append ensures JSON serializes as [] not null
 - [Phase 15]: TestRegisterOnConnect upgraded from chan string to chan protocol.NodeRegister to verify full Projects round-trip through registration frame
+- [Phase 16-instance-lifecycle-fixes]: exit_code extracted via errors.As + exec.ExitError in InstanceFinished; SessionID (omitempty) populated from proc.SessionID() as authoritative final session ID
 
 ### Pending Todos
 

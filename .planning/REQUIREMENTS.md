@@ -29,10 +29,10 @@ Requirements for the custom webapp milestone. Each maps to roadmap phases.
 - [x] **INST-01**: Node spawns Claude CLI subprocess on `run` command with project working directory
 - [x] **INST-02**: Each instance gets a UUID, included in every outgoing frame
 - [x] **INST-03**: Node streams Claude NDJSON output to server as `instance_chunk` events
-- [ ] **INST-04**: Node sends lifecycle events: `instance_started`, `instance_finished`, `instance_error`
+- [x] **INST-04**: Node sends lifecycle events: `instance_started`, `instance_finished`, `instance_error`
 - [x] **INST-05**: Multiple Claude instances can run simultaneously in the same project directory
 - [x] **INST-06**: Node can kill a specific instance by ID on server command
-- [ ] **INST-07**: Instances use `--resume SESSION_ID` to maintain persistent Claude sessions across restarts
+- [x] **INST-07**: Instances use `--resume SESSION_ID` to maintain persistent Claude sessions across restarts
 
 ### Node Lifecycle
 
@@ -98,10 +98,10 @@ Deferred to v1.2.x or later. Tracked but not in current roadmap.
 | INST-01 | Phase 13 | Complete |
 | INST-02 | Phase 13 | Complete |
 | INST-03 | Phase 13 | Complete |
-| INST-04 | Phase 16 | Pending |
+| INST-04 | Phase 16 | Complete |
 | INST-05 | Phase 13 | Complete |
 | INST-06 | Phase 13 | Complete |
-| INST-07 | Phase 16 | Pending |
+| INST-07 | Phase 16 | Complete |
 | NODE-01 | Phase 10 | Complete |
 | NODE-02 | Phase 15 | Complete |
 | NODE-03 | Phase 13 | Complete |
