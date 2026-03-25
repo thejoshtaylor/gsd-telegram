@@ -130,6 +130,9 @@ Plans:
   1. `InstanceFinished.ExitCode` reflects the real process exit code extracted from `exec.ExitError`, not hardcoded `0`
   2. `InstanceFinished` includes a `SessionID` field populated from `proc.SessionID()` so the server learns new session IDs
   3. `docs/protocol-spec.md` and `docs/server-spec.md` updated to reflect `session_id` field and real exit code semantics
+**Plans:** 1 plan
+Plans:
+- [ ] 16-01-PLAN.md — Real exit code extraction, SessionID on InstanceFinished, and spec doc updates
 
 ### Phase 17: Dead Code Removal and Test Fixes
 **Goal**: Remove Telegram-era dead code and fix test infrastructure so `go test -race ./...` passes clean
@@ -157,5 +160,5 @@ Plans:
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 3/3 | Complete    | 2026-03-21 |
 | 14. Protocol and Server Spec Documents | v1.2 | 2/2 | Complete    | 2026-03-21 |
 | 15. Project Config and Registration | v1.2 | 1/1 | Complete    | 2026-03-25 |
-| 16. Instance Lifecycle Fixes | v1.2 | 0/0 | Planned | — |
+| 16. Instance Lifecycle Fixes | v1.2 | 0/1 | Planned | — |
 | 17. Dead Code Removal and Test Fixes | v1.2 | 0/0 | Planned | — |
