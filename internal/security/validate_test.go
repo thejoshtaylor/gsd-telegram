@@ -1,6 +1,7 @@
 package security
 
 import (
+	"runtime"
 	"testing"
 )
 
@@ -40,6 +41,9 @@ func TestValidatePathWindows(t *testing.T) {
 
 // TestValidatePathWindowsTraversal verifies traversal is blocked on Windows paths too.
 func TestValidatePathWindowsTraversal(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("Windows path traversal test requires Windows filepath.Clean semantics")
+	}
 	allowed := []string{`C:\Users\me\projects`}
 	if ValidatePath(`C:\Users\me\projects\..\..\..\Windows\System32\cmd.exe`, allowed) {
 		t.Fatal("expected Windows traversal path to be blocked after normalization")
