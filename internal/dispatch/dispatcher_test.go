@@ -24,6 +24,29 @@ import (
 )
 
 // ---------------------------------------------------------------------------
+// safeBuffer: thread-safe bytes.Buffer for zerolog in concurrent tests
+// ---------------------------------------------------------------------------
+
+// safeBuffer is a thread-safe bytes.Buffer for use as a zerolog writer in
+// tests where multiple goroutines log concurrently.
+type safeBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (sb *safeBuffer) Write(p []byte) (n int, err error) {
+	sb.mu.Lock()
+	defer sb.mu.Unlock()
+	return sb.buf.Write(p)
+}
+
+func (sb *safeBuffer) String() string {
+	sb.mu.Lock()
+	defer sb.mu.Unlock()
+	return sb.buf.String()
+}
+
+// ---------------------------------------------------------------------------
 // Mock ConnectionSender
 // ---------------------------------------------------------------------------
 
@@ -187,8 +210,7 @@ func newTestDispatcher(t *testing.T, claudePath string) (*Dispatcher, *mockConn,
 
 	limiter := security.NewProjectRateLimiter(cfg.RateLimitRequests, cfg.RateLimitWindow)
 
-	var logBuf bytes.Buffer
-	log := zerolog.New(&logBuf)
+	log := zerolog.Nop()
 
 	d := New(conn, cfg, nodeCfg, auditLog, limiter, log)
 	return d, conn, cfg, nodeCfg
@@ -970,7 +992,7 @@ func claudeBuildArgs(sessionID string) []string {
 func TestStructuredLogging(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
-	var logBuf bytes.Buffer
+	var logBuf safeBuffer
 	log := zerolog.New(&logBuf)
 
 	conn := newMockConn()
