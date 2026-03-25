@@ -172,7 +172,7 @@ func newTestDispatcher(t *testing.T, claudePath string) (*Dispatcher, *mockConn,
 
 	nodeCfg := &config.NodeConfig{
 		NodeID:                "test-node-01",
-		ServerURL:             "ws://localhost:9999",
+		ServerURL:             "wss://localhost:9999",
 		ServerToken:           "test-token",
 		HeartbeatIntervalSecs: 30,
 	}
