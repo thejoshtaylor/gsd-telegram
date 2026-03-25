@@ -4,7 +4,7 @@
 
 - v1.0 GSD Telegram Bot Go Rewrite — Phases 1-7 (shipped 2026-03-20) — [Archive](milestones/v1.0-ROADMAP.md)
 - v1.1 Bugfixes — Phases 8-9 (shipped 2026-03-20) — [Archive](milestones/v1.1-ROADMAP.md)
-- v1.2 Custom Webapp — Phases 10-14 (in progress)
+- v1.2 Custom Webapp — Phases 10-17 (in progress)
 
 ## Phases
 
@@ -108,9 +108,40 @@ Plans:
 - [x] 14-01-PLAN.md — Wire protocol specification (message catalog, Envelope, auth, reconnect, sequence diagrams)
 - [x] 14-02-PLAN.md — Server backend specification (WebSocket endpoint, data models, Whisper integration)
 
+### Phase 15: Project Config and Registration
+**Goal**: NodeRegister sends real project list from config so the server knows what projects the node can handle
+**Depends on**: Phase 10
+**Requirements**: PROTO-01, NODE-02
+**Gap Closure:** Closes gaps from v1.2 audit
+**Success Criteria** (what must be TRUE):
+  1. `NodeConfig` has a `Projects []string` field populated from environment or config file
+  2. `NodeRegister` frame includes the configured project list (not empty `[]`)
+  3. Tests verify projects round-trip through registration
+
+### Phase 16: Instance Lifecycle Fixes
+**Goal**: Instance finish events carry real exit codes and session IDs so the server can track instance outcomes and resume sessions
+**Depends on**: Phase 13
+**Requirements**: INST-04, INST-07
+**Gap Closure:** Closes gaps from v1.2 audit
+**Success Criteria** (what must be TRUE):
+  1. `InstanceFinished.ExitCode` reflects the real process exit code extracted from `exec.ExitError`, not hardcoded `0`
+  2. `InstanceFinished` includes a `SessionID` field populated from `proc.SessionID()` so the server learns new session IDs
+  3. `docs/protocol-spec.md` and `docs/server-spec.md` updated to reflect `session_id` field and real exit code semantics
+
+### Phase 17: Dead Code Removal and Test Fixes
+**Goal**: Remove Telegram-era dead code and fix test infrastructure so `go test -race ./...` passes clean
+**Depends on**: Phase 12
+**Requirements**: CLEAN-02, CLEAN-04
+**Gap Closure:** Closes gaps from v1.2 audit
+**Success Criteria** (what must be TRUE):
+  1. `ChannelRateLimiter` type and its tests are deleted from `security/ratelimit.go`
+  2. `internal/session` package is either wired into production code at startup or removed entirely
+  3. Dispatch tests use a thread-safe logger — `go test -race ./internal/dispatch/...` passes
+  4. `TestValidatePathWindowsTraversal` is platform-aware and passes on macOS
+
 ## Progress
 
-**Execution Order:** 10 → 11 → 12 → 13 → 14
+**Execution Order:** 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -122,3 +153,6 @@ Plans:
 | 12. Telegram Removal and Session Migration | v1.2 | 2/2 | Complete    | 2026-03-21 |
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 3/3 | Complete    | 2026-03-21 |
 | 14. Protocol and Server Spec Documents | v1.2 | 2/2 | Complete    | 2026-03-21 |
+| 15. Project Config and Registration | v1.2 | 0/0 | Planned | — |
+| 16. Instance Lifecycle Fixes | v1.2 | 0/0 | Planned | — |
+| 17. Dead Code Removal and Test Fixes | v1.2 | 0/0 | Planned | — |
