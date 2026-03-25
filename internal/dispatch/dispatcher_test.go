@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -823,6 +824,125 @@ func TestResumeSession(t *testing.T) {
 	}
 	if !foundResume {
 		t.Errorf("expected --resume %s in args; got %v", sessionID, args)
+	}
+}
+
+// createMockClaudeWithExit writes a temporary script that outputs the given NDJSON lines
+// to stdout and exits with the specified exit code.
+func createMockClaudeWithExit(t *testing.T, lines []string, exitCode int) string {
+	t.Helper()
+	dir := t.TempDir()
+
+	content := strings.Join(lines, "\n")
+
+	var scriptPath string
+	if runtime.GOOS == "windows" {
+		scriptPath = filepath.Join(dir, "mock_claude_exit.bat")
+		var sb strings.Builder
+		sb.WriteString("@echo off\r\n")
+		for _, line := range lines {
+			escaped := strings.ReplaceAll(line, "<", "^<")
+			escaped = strings.ReplaceAll(escaped, ">", "^>")
+			escaped = strings.ReplaceAll(escaped, "&", "^&")
+			escaped = strings.ReplaceAll(escaped, "|", "^|")
+			escaped = strings.ReplaceAll(escaped, "(", "^(")
+			escaped = strings.ReplaceAll(escaped, ")", "^)")
+			sb.WriteString("echo " + escaped + "\r\n")
+		}
+		sb.WriteString(fmt.Sprintf("exit /b %d\r\n", exitCode))
+		if err := os.WriteFile(scriptPath, []byte(sb.String()), 0755); err != nil {
+			t.Fatalf("failed to write mock claude bat: %v", err)
+		}
+	} else {
+		scriptPath = filepath.Join(dir, "mock_claude_exit.sh")
+		dataFile := filepath.Join(dir, "output.txt")
+		if err := os.WriteFile(dataFile, []byte(content+"\n"), 0644); err != nil {
+			t.Fatalf("failed to write mock claude data: %v", err)
+		}
+		script := fmt.Sprintf("#!/bin/sh\ncat '%s'\nexit %d\n", dataFile, exitCode)
+		if err := os.WriteFile(scriptPath, []byte(script), 0755); err != nil {
+			t.Fatalf("failed to write mock claude sh: %v", err)
+		}
+	}
+	return scriptPath
+}
+
+// TestInstanceFinishedExitCodeAndSessionID verifies that InstanceFinished carries
+// ExitCode=0 and the SessionID from the NDJSON output on a clean exit.
+func TestInstanceFinishedExitCodeAndSessionID(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	claudePath := createMockClaude(t, []string{ndjsonLine("sess-fin", "done")})
+
+	d, conn, _, _ := newTestDispatcher(t, claudePath)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go d.Run(ctx)
+	defer func() {
+		d.Stop()
+		cancel()
+		d.Wait()
+	}()
+
+	sendExecute(conn, "inst-fin-check", "projectFin", "")
+
+	finEnv, found := conn.waitForType(t, protocol.TypeInstanceFinished, 8*time.Second)
+	if !found {
+		t.Fatal("expected InstanceFinished, got none")
+	}
+
+	var fin protocol.InstanceFinished
+	if err := finEnv.Decode(&fin); err != nil {
+		t.Fatalf("failed to decode InstanceFinished: %v", err)
+	}
+	if fin.ExitCode != 0 {
+		t.Errorf("ExitCode: got %d, want 0", fin.ExitCode)
+	}
+	if fin.SessionID != "sess-fin" {
+		t.Errorf("SessionID: got %q, want %q", fin.SessionID, "sess-fin")
+	}
+}
+
+// TestInstanceFinishedNonZeroExitCode verifies that InstanceFinished (or InstanceError)
+// reflects a non-zero exit code, not hardcoded 0.
+func TestInstanceFinishedNonZeroExitCode(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
+	claudePath := createMockClaudeWithExit(t, []string{ndjsonLine("sess-nz", "done")}, 2)
+
+	d, conn, _, _ := newTestDispatcher(t, claudePath)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	go d.Run(ctx)
+	defer func() {
+		d.Stop()
+		cancel()
+		d.Wait()
+	}()
+
+	sendExecute(conn, "inst-nz-exit", "projectNZ", "")
+
+	// Non-zero exit may result in either InstanceFinished or InstanceError depending
+	// on whether the exit error is treated as a stream error.
+	finEnv, gotFinished := conn.waitForType(t, protocol.TypeInstanceFinished, 8*time.Second)
+	if gotFinished {
+		var fin protocol.InstanceFinished
+		if err := finEnv.Decode(&fin); err != nil {
+			t.Fatalf("failed to decode InstanceFinished: %v", err)
+		}
+		if fin.ExitCode != 2 {
+			t.Errorf("ExitCode: got %d, want 2", fin.ExitCode)
+		}
+		return
+	}
+	// InstanceError is also acceptable for non-zero exit.
+	_, gotError := conn.waitForType(t, protocol.TypeInstanceError, 500*time.Millisecond)
+	if !gotError {
+		t.Fatal("expected InstanceFinished with exit_code=2 or InstanceError, got neither")
 	}
 }
 

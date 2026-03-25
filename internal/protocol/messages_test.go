@@ -152,7 +152,7 @@ func TestEnvelopeRoundTrip(t *testing.T) {
 		{
 			name:    "instance_finished",
 			msgType: TypeInstanceFinished,
-			payload: InstanceFinished{InstanceID: "inst-5", ExitCode: 0},
+			payload: InstanceFinished{InstanceID: "inst-5", ExitCode: 0, SessionID: "sess-fin-1"},
 			verify: func(t *testing.T, env Envelope) {
 				t.Helper()
 				var got InstanceFinished
@@ -165,6 +165,9 @@ func TestEnvelopeRoundTrip(t *testing.T) {
 				// ExitCode 0 must be preserved — not omitted.
 				if got.ExitCode != 0 {
 					t.Errorf("ExitCode: got %d, want 0", got.ExitCode)
+				}
+				if got.SessionID != "sess-fin-1" {
+					t.Errorf("SessionID: got %q, want %q", got.SessionID, "sess-fin-1")
 				}
 			},
 		},
@@ -293,6 +296,22 @@ func TestNewMsgID(t *testing.T) {
 	}
 	if id1 == id2 {
 		t.Error("two consecutive IDs should not be equal")
+	}
+}
+
+// TestInstanceFinishedSessionIDOmitempty verifies that when SessionID is empty,
+// the JSON output does NOT contain the "session_id" key (omitempty behavior).
+func TestInstanceFinishedSessionIDOmitempty(t *testing.T) {
+	t.Parallel()
+
+	fin := InstanceFinished{InstanceID: "inst-omit", ExitCode: 0}
+	raw, err := json.Marshal(fin)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	got := string(raw)
+	if strings.Contains(got, "session_id") {
+		t.Errorf("expected session_id to be absent when empty (omitempty), got: %s", got)
 	}
 }
 

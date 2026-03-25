@@ -133,11 +133,17 @@ type InstanceStarted struct {
 }
 
 // InstanceFinished is sent when a Claude CLI subprocess exits cleanly.
+// SessionID carries the output session ID from this run (the session Claude used or
+// created). This differs from InstanceStarted.SessionID, which carries the input
+// (resume) session ID. The server should persist this value for future --resume use.
 type InstanceFinished struct {
 	// InstanceID identifies the instance that finished.
 	InstanceID string `json:"instance_id"`
-	// ExitCode is the OS exit code from the Claude CLI process.
+	// ExitCode is the real OS exit code from the Claude CLI process.
+	// 0 = clean exit, -1 = killed by signal, positive = CLI error code.
 	ExitCode int `json:"exit_code"`
+	// SessionID is the Claude session ID from this run. Omitted when empty (omitempty).
+	SessionID string `json:"session_id,omitempty"`
 }
 
 // InstanceError is sent when a Claude CLI subprocess exits with an error

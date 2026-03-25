@@ -6,6 +6,8 @@ package dispatch
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"os/exec"
 	"runtime"
 	"sync"
 	"time"
@@ -251,6 +253,13 @@ func (d *Dispatcher) runInstance(ctx context.Context, cmd protocol.ExecuteCmd) {
 		d.mu.Unlock()
 	}
 
+	// Extract real exit code from the stream error (if any).
+	exitCode := 0
+	var exitErr *exec.ExitError
+	if errors.As(streamErr, &exitErr) {
+		exitCode = exitErr.ExitCode()
+	}
+
 	// Emit terminal event exactly once (kill + natural exit race guard).
 	inst.done.Do(func() {
 		if streamErr != nil && ctx.Err() == nil {
@@ -261,10 +270,11 @@ func (d *Dispatcher) runInstance(ctx context.Context, cmd protocol.ExecuteCmd) {
 				Error:      streamErr.Error(),
 			})
 		} else {
-			instLog.Info().Msg("instance finished")
+			instLog.Info().Int("exit_code", exitCode).Msg("instance finished")
 			d.sendEnvelope(protocol.TypeInstanceFinished, protocol.NewMsgID(), protocol.InstanceFinished{
 				InstanceID: cmd.InstanceID,
-				ExitCode:   0,
+				ExitCode:   exitCode,
+				SessionID:  proc.SessionID(),
 			})
 		}
 	})
