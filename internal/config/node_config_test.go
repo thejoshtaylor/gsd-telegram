@@ -91,6 +91,24 @@ func TestLoadNodeConfigInvalidHeartbeat(t *testing.T) {
 	}
 }
 
+// TestLoadNodeConfigRejectsInsecureWS verifies that LoadNodeConfig rejects ws:// URLs.
+func TestLoadNodeConfigRejectsInsecureWS(t *testing.T) {
+	t.Setenv("SERVER_URL", "ws://example.com/ws")
+	t.Setenv("SERVER_TOKEN", "secret")
+	t.Setenv("HEARTBEAT_INTERVAL_SECS", "")
+
+	_, err := LoadNodeConfig()
+	if err == nil {
+		t.Fatal("LoadNodeConfig() should return error when SERVER_URL uses ws:// scheme")
+	}
+	if !strings.Contains(err.Error(), "wss://") {
+		t.Errorf("error should mention wss://, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "ws://") {
+		t.Errorf("error should mention the rejected scheme ws://, got: %v", err)
+	}
+}
+
 // TestLoadNodeConfigNoTelegramRequired verifies that LoadNodeConfig succeeds without Telegram env vars.
 func TestLoadNodeConfigNoTelegramRequired(t *testing.T) {
 	t.Setenv("SERVER_URL", "wss://example.com/ws")

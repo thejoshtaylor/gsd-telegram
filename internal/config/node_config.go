@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -37,6 +38,9 @@ func LoadNodeConfig() (*NodeConfig, error) {
 	cfg.ServerURL = os.Getenv("SERVER_URL")
 	if cfg.ServerURL == "" {
 		return nil, fmt.Errorf("SERVER_URL environment variable is required")
+	}
+	if !strings.HasPrefix(cfg.ServerURL, "wss://") {
+		return nil, fmt.Errorf("SERVER_URL must use wss:// scheme (got %q) — plaintext ws:// is not allowed", cfg.ServerURL)
 	}
 
 	// --- Required: SERVER_TOKEN ---
