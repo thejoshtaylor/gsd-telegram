@@ -117,9 +117,9 @@ Plans:
   1. `NodeConfig` has a `Projects []string` field populated from environment or config file
   2. `NodeRegister` frame includes the configured project list (not empty `[]`)
   3. Tests verify projects round-trip through registration
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 15-01-PLAN.md — Add PROJECTS env var to NodeConfig and wire through to NodeRegister frame
+- [x] 15-01-PLAN.md — Add PROJECTS env var to NodeConfig and wire through to NodeRegister frame
 
 ### Phase 16: Instance Lifecycle Fixes
 **Goal**: Instance finish events carry real exit codes and session IDs so the server can track instance outcomes and resume sessions
@@ -156,6 +156,6 @@ Plans:
 | 12. Telegram Removal and Session Migration | v1.2 | 2/2 | Complete    | 2026-03-21 |
 | 13. Dispatch, Instance Management, and Node Lifecycle | v1.2 | 3/3 | Complete    | 2026-03-21 |
 | 14. Protocol and Server Spec Documents | v1.2 | 2/2 | Complete    | 2026-03-21 |
-| 15. Project Config and Registration | v1.2 | 0/1 | Planned | — |
+| 15. Project Config and Registration | v1.2 | 1/1 | Complete   | 2026-03-25 |
 | 16. Instance Lifecycle Fixes | v1.2 | 0/0 | Planned | — |
 | 17. Dead Code Removal and Test Fixes | v1.2 | 0/0 | Planned | — |

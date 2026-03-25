@@ -18,7 +18,7 @@ Requirements for the custom webapp milestone. Each maps to roadmap phases.
 
 ### Protocol
 
-- [ ] **PROTO-01**: Node sends registration frame on connect: node_id (hardware-derived), platform, project list, version
+- [x] **PROTO-01**: Node sends registration frame on connect: node_id (hardware-derived), platform, project list, version
 - [x] **PROTO-02**: Message envelope format: `type` + `id` + JSON payload for all frames
 - [x] **PROTO-03**: Node receives and ACKs `run` commands before execution begins
 - [x] **PROTO-04**: Node receives and handles `kill` commands to terminate specific instances
@@ -37,7 +37,7 @@ Requirements for the custom webapp milestone. Each maps to roadmap phases.
 ### Node Lifecycle
 
 - [x] **NODE-01**: Node ID auto-derived from hardware identifiers (machine ID or hostname hash) — not user-configured
-- [ ] **NODE-02**: Config via `.env`: `SERVER_URL`, `SERVER_TOKEN`, `HEARTBEAT_INTERVAL_SECS`
+- [x] **NODE-02**: Config via `.env`: `SERVER_URL`, `SERVER_TOKEN`, `HEARTBEAT_INTERVAL_SECS`
 - [x] **NODE-03**: Graceful shutdown drains active streams, kills remaining processes, sends disconnect
 - [x] **NODE-04**: Per-project rate limiting on incoming `run` commands using token bucket
 - [x] **NODE-05**: Structured logging with `node_id`, `instance_id`, `project` context fields
@@ -90,7 +90,7 @@ Deferred to v1.2.x or later. Tracked but not in current roadmap.
 | XPORT-04 | Phase 11 | Complete |
 | XPORT-05 | Phase 11 | Complete |
 | XPORT-06 | Phase 11 | Complete |
-| PROTO-01 | Phase 15 | Pending |
+| PROTO-01 | Phase 15 | Complete |
 | PROTO-02 | Phase 10 | Complete |
 | PROTO-03 | Phase 13 | Complete |
 | PROTO-04 | Phase 13 | Complete |
@@ -103,7 +103,7 @@ Deferred to v1.2.x or later. Tracked but not in current roadmap.
 | INST-06 | Phase 13 | Complete |
 | INST-07 | Phase 16 | Pending |
 | NODE-01 | Phase 10 | Complete |
-| NODE-02 | Phase 15 | Pending |
+| NODE-02 | Phase 15 | Complete |
 | NODE-03 | Phase 13 | Complete |
 | NODE-04 | Phase 13 | Complete |
 | NODE-05 | Phase 13 | Complete |
